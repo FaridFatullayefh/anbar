@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borcların və Tələblərin İdarə Edilməsi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* CSS kodları olduğu kimi saxlanıldı */
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .search-box i {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            z-index: 10;
+            pointer-events: none;
+            font-size: 16px;
+        }
+        .search-input {
+            padding: 10px 15px 10px 45px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            height: 42px;
+            width: 100%;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: #f5f5f5;
+            border: none;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+            background-color: #fff;
+        }
+        
+        :root {
+            --primary-color: #343a40; 
+            --secondary-color: #007bff; 
+            --success-color: #28a745; 
+            --danger-color: #dc3545;  
+            --warning-color: #ffc107;  
+            --light-bg: #f8f9fa;      
+            --white: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--light-bg);
+            min-height: 100vh;
+            color: #333;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid;
+        }
+
+        .section-header-receivable {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .section-header-debt {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.25em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-message {
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid transparent;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-info {
+            background-color: #cce5ff;
+            color: #004085;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: -25px -25px 20px -25px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .col-md-3 {
+            flex: 0 0 25%;
+            padding: 0 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+            font-size: 0.875em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: var(--white);
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+            background: var(--white);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+        }
+
+        .table-dark th {
+            background-color: var(--primary-color);
+            color: var(--white);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .receivable-row { 
+            background-color: rgba(40, 167, 69, 0.05); 
+        } 
+        .debt-row { 
+            background-color: rgba(220, 53, 69, 0.05); 
+        } 
+
+        .detail-receivable-row { background-color: rgba(40, 167, 69, 0.03); }
+        .detail-debt-row { background-color: rgba(220, 53, 69, 0.03); }
+
+        .amount-income {
+            color: var(--success-color) !important;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .amount-expense {
+            color: var(--danger-color) !important;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        tr:hover .amount-income { color: #1e7e34 !important; }
+        tr:hover .amount-expense { color: #c82333 !important; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-align: center;
+            color: var(--white);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .bg-success { background-color: var(--success-color); }
+        .bg-danger { background-color: var(--danger-color); }
+        .bg-secondary { background-color: #6c757d; }
+        .bg-warning { background-color: var(--warning-color); }
+        .bg-info { background-color: var(--secondary-color); }
+
+        .text-success { color: var(--success-color) !important; }
+        .text-danger { color: var(--danger-color) !important; }
+        .font-weight-bold { font-weight: 700; }
+
+        .payment-btn {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            margin-right: 10px;
+        }
+
+        .payment-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .back-link {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-top: 30px;
+            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            background-color: #23272b;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            color: var(--primary-color);
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group strong {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+
+        .btn-cancel {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-pay {
+            background-color: var(--success-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .btn-pay:hover {
+            background-color: #218838;
+        }
+
+        .mr-2 { margin-right: 8px; }
+        .mt-3 { margin-top: 12px; }
+
+        @media (max-width: 992px) {
+            .col-md-3 { flex: 0 0 50%; max-width: 50%; }
+        }
+        @media (max-width: 768px) {
+            .col-md-3 { flex: 0 0 100%; max-width: 100%; }
+            .container { padding: 20px; }
+            h1 { font-size: 1.5em; }
+            table { min-width: 600px; }
+        }
+        @media (max-width: 480px) {
+            th, td { padding: 8px 10px; }
+            .amount-income, .amount-expense { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <div class="mb 4">
+        <h1 class="mb-4">
+            <i class="fas fa-credit-card"></i>
+            Borcların və Tələblərin İdarə Edilməsi
+        </h1>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="companySearch" class="search-input" placeholder="Şirkət adı ilə axtarış...">
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mt-3">
+                {% for category, message in messages %}
+                    {% set msg_class = 'alert-info' %}
+                    {% if category == 'success' %}
+                        {% set msg_class = 'alert-success' %}
+                    {% elif category == 'danger' or category == 'error' %}
+                        {% set msg_class = 'alert-danger' %}
+                    {% endif %}
+                    <div class="alert-message {{ msg_class }}" role="alert">
+                        <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' or category == 'error' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-2"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-plus-circle"></i>
+            Yeni Borc/Tələb Qeydiyyatı
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <input type="hidden" name="action" value="add">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="type" class="form-label">Növü</label>
+                        <select name="type" id="type" class="form-select" required>
+                            <option value="debt">Borc (Biz ödəməliyik)</option>
+                            <option value="receivable">Tələb (Bizə ödənilməlidir)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="party_name" class="form-label">Tərəf Adı</label>
+                        <input type="text" name="party_name" id="party_name" class="form-control" placeholder="Təchizatçı/Müştəri" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="initial_amount" class="form-label">Məbləğ (AZN)</label>
+                        <input type="number" name="initial_amount" id="initial_amount" step="0.01" class="form-control" required min="0.01">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="due_date" class="form-label">Tarix</label>
+                        <input type="date" name="due_date" id="due_date" class="form-control">
+                    </div>
+                </div>
+                <button type="submit" class="btn-success">
+                    <i class="fas fa-save"></i>
+                    Qeyd Et
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <h2 class="section-header-debt">
+        <i class="fas fa-balance-scale"></i>
+        Bütün Borclar və Tələblər
+    </h2>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Tərəf</th>
+                    <th>Alacaq</th>
+                    <th>Borc</th>
+                    <th>Xalis</th>
+                    <th>Əməliyyat</th>
+                    <th>İdarə</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if companies %}
+                    {% for company in companies %}
+                        {% set net_balance = company['total_receivable'] - company['total_debt'] %}
+                        <tr class="{% if net_balance > 0 %}receivable-row{% elif net_balance < 0 %}debt-row{% endif %}"
+                            data-company-name="{{ company['company_name'] }}"
+                            data-total-receivable="{{ company['total_receivable'] }}"
+                            data-total-debt="{{ company['total_debt'] }}"
+                            data-net-balance="{{ net_balance }}">
+                            <td class="font-weight-bold">{{ company['company_name'] }}</td>
+                            <td class="amount-income">{{ "%.2f"|format(company['total_receivable']) }} AZN</td>
+                            <td class="amount-expense">{{ "%.2f"|format(company['total_debt']) }} AZN</td>
+                            <td class="{% if net_balance > 0 %}amount-income{% elif net_balance < 0 %}amount-expense{% else %}text-muted{% endif %} font-weight-bold">
+                                {{ "%.2f"|format(net_balance) }} AZN
+                            </td>
+                            <td>{{ company['debt_count'] }}</td>
+                            <td>
+                               <a href="{{ url_for('debts_management', company_name=company['company_name'], show_details='true') }}" 
+   class="payment-btn">
+    <i class="fas fa-eye"></i> Detallar
+</a>
+{% if company['total_receivable'] > 0 or company['total_debt'] > 0 %}
+    {% if company['total_receivable'] > 0 and company['total_debt'] > 0 %}
+    <button type="button" class="payment-btn open-offset-modal bg-info"
+        data-party-name="{{ company['company_name'] }}"
+        data-total-receivable="{{ company['total_receivable'] }}"
+        data-total-debt="{{ company['total_debt'] }}"
+        data-net-balance="{{ net_balance }}">
+        <i class="fas fa-exchange-alt"></i> Əvəzləşdirmə
+    </button>
+    {% endif %}
+    <button type="button" class="payment-btn open-payment-modal bg-success"
+        data-party-name="{{ company['company_name'] }}"
+        data-total-receivable="{{ company['total_receivable'] }}"
+        data-total-debt="{{ company['total_debt'] }}"
+        data-net-balance="{{ net_balance }}">
+        <i class="fas fa-money-bill-transfer"></i> Ödəniş
+    </button>
+{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #6c757d; padding: 40px;">
+                            <i class="fas fa-inbox" style="font-size: 3em; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <p>Açıq borc/tələb yoxdur</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if selected_company and show_details %}
+    <h2 class="section-header-receivable">
+        <i class="fas fa-list"></i>
+        {{ selected_company }} - Detallar
+        <a href="{{ url_for('debts_management') }}" class="back-link" style="float: right; padding: 8px 15px; font-size: 0.9em; background-color: var(--secondary-color);">
+            <i class="fas fa-arrow-left"></i> Bütün Tərəflər
+        </a>
+    </h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-chart-bar"></i>
+            Ümumi Qalıq
+        </div>
+        <div style="padding: 20px;">
+            <p><strong>Ümumi Qalıq:</strong> 
+                <span class="font-weight-bold">{{ "%.2f AZN"|format(total_remaining) }}</span>
+                (Alacaq: <span class="amount-income">{{ "%.2f AZN"|format(total_receivable_remaining) }}</span> | 
+                Borc: <span class="amount-expense">{{ "%.2f AZN"|format(total_debt_remaining) }}</span>)
+            </p>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Mənbə</th>
+                    <th>Növ</th>
+                    <th>Təsvir</th>
+                    <th>Başlanğıc</th>
+                    <th>Ödənilib</th>
+                    <th class="amount-income">Qalıq</th>
+                    <th>Tarix</th>
+                    <th>Son Ödəniş</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if debt_details %}
+                    {% for detail in debt_details %}
+                    {% set row_class = 'detail-debt-row' if detail['type'] == 'Debt' else 'detail-receivable-row' %}
+                    <tr class="{{ row_class }}">
+                        <td>{{ detail['id'] }}</td>
+                        <td>
+                            {% if detail['source'] == 'customer' %}
+                                <span class="badge bg-success"><i class="fas fa-shopping-cart"></i> Satış</span>
+                            {% elif detail['type'] == 'Debt' %}
+                                <span class="badge bg-danger"><i class="fas fa-truck"></i> Təchizatçı</span>
+                            {% elif detail['type'] == 'Receivable' %}
+                                <span class="badge bg-info"><i class="fas fa-hand-holding-usd"></i> Alacaq</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if detail['type'] == 'Receivable' %}
+                                <span class="badge bg-success"><i class="fas fa-arrow-down"></i> Alacaq</span>
+                            {% elif detail['type'] == 'Debt' %}
+                                <span class="badge bg-danger"><i class="fas fa-arrow-up"></i> Öhdəlik</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ detail['description'] or 'Təsvir yoxdur' }}</td>
+                        <td>{{ "%.2f AZN"|format(detail['initial_amount']) }}</td>
+                        <td>{{ "%.2f AZN"|format(detail['paid_amount']) }}</td>
+                        <td class="{% if detail['type'] == 'Receivable' %}amount-income{% else %}amount-expense{% endif %}">
+                            {{ "%.2f"|format(detail['remaining']) }} AZN
+                        </td>
+                        <td>{{ detail['created_at'] or 'N/A' }}</td>
+                        <td>{{ detail['due_date'] or '-' }}</td>
+                        <td>
+                            {% if detail['remaining'] > 0 %}
+                                <span class="badge bg-warning"><i class="fas fa-clock"></i> Gözlənilir</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-check"></i> Ödənilib</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" style="text-align: center; color: #6c757d; padding: 40px;">
+                            Açıq əməliyyat tapılmadı
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3>
+        <i class="fas fa-history"></i>
+        Ödəniş Tarixçəsi
+    </h3>
+    <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Qeyd ID</th>
+                    <th>Məbləğ</th>
+                    <th>Təsvir</th>
+                    <th>Tarix</th>
+                    <th>Qeyd Edən</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if payment_history %}
+                    {% for payment in payment_history %}
+                    <tr>
+                        <td>{{ payment['debt_id'] }}</td>
+                        <td class="amount-income">{{ "%.2f AZN"|format(payment['amount']) }}</td>
+                        <td>{{ payment['description'] or 'N/A' }}</td>
+                        <td>{{ payment['payment_date'] }}</td>
+                        <td>{{ payment['employee_name'] }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #6c757d;">
+                            Heç bir ödəniş qeydə alınmayıb
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('index') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Geri
+    </a>
+</main>
+
+<div id="paymentModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-money-bill-transfer"></i>
+            Ödəniş/Qəbul Əməliyyatı
+        </div>
+        <form id="paymentForm" method="POST">
+            <input type="hidden" name="action" value="pay_consolidated">
+            <input type="hidden" name="company_name" id="modalCompanyName">
+            
+            <div class="form-group">
+                <strong><i class="fas fa-user"></i> Tərəf:</strong> 
+                <span id="displayPartyName" class="font-weight-bold"></span>
+            </div>
+            <div class="form-group">
+                <strong><i class="fas fa-arrow-down"></i> Alacaq (Qalıq):</strong> 
+                <span id="displayReceivable" class="amount-income"></span> AZN
+            </div>
+            <div class="form-group">
+                <strong><i class="fas fa-arrow-up"></i> Borc (Qalıq):</strong> 
+                <span id="displayDebt" class="amount-expense"></span> AZN
+            </div>
+            
+            <hr style="margin: 20px 0;">
+            
+            <div class="form-group">
+                <label class="form-label">Əməliyyat Növü</label>
+                <select name="payment_type" id="paymentType" class="form-select" required>
+                    <option value="">-- Seçim edin --</option>
+                    <option value="debt_payment">Borc Ödənişi (Biz ödəyirik)</option>
+                    <option value="receivable_payment">Alacaq Qəbulu (Biz qəbul edirik)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Məbləğ (AZN)</label>
+                <input type="number" name="payment_amount" id="paymentAmount" step="0.01" class="form-control" required min="0.01">
+                <small class="text-muted">Ən köhnə açıq borclardan başlayaraq paylanılacaq</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Təsvir</label>
+                <input type="text" name="payment_desc" class="form-control" placeholder="Ödəniş qeydi">
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="cancelPaymentButton">
+                    <i class="fas fa-times"></i> Ləğv Et
+                </button>
+                <button type="submit" class="btn-pay">
+                    <i class="fas fa-check"></i> Qeyd Et
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="offsetModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-exchange-alt"></i>
+            Qarşılıqlı Öhdəliklərin Əvəzləşdirilməsi
+        </div>
+        <form id="offsetForm" method="POST">
+            <input type="hidden" name="action" value="offset_debt_receivable">
+            <input type="hidden" name="company_name" id="modalCompanyNameOffset"> 
+            
+            <div class="form-group">
+                <strong><i class="fas fa-user"></i> Tərəf:</strong> 
+                <span id="displayPartyNameOffset" class="font-weight-bold"></span>
+            </div>
+            <div class="form-group">
+                <strong><i class="fas fa-arrow-down"></i> Alacaq (Qalıq):</strong> 
+                <span id="displayReceivableOffset" class="amount-income"></span> AZN
+            </div>
+            <div class="form-group">
+                <strong><i class="fas fa-arrow-up"></i> Borc (Qalıq):</strong> 
+                <span id="displayDebtOffset" class="amount-expense"></span> AZN
+            </div>
+            
+            <hr style="margin: 20px 0;">
+            
+            <div class="alert-message alert-info">
+                <i class="fas fa-info-circle"></i> 
+                Əvəzləşdirmə məbləği həm Alacaq, həm də Borc qalıqlarının minimumundan çox ola bilməz.
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Əvəzləşdirmə Məbləği (AZN)</label>
+                <input type="number" name="offset_amount" id="offsetAmountInput" step="0.01" class="form-control" required min="0.01">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Təsvir</label>
+                <input type="text" name="offset_desc" class="form-control" placeholder="Əvəzləşdirmə qeydi">
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="cancelOffsetButton">
+                    <i class="fas fa-times"></i> Ləğv Et
+                </button>
+                <button type="submit" class="btn-pay bg-info">
+                    <i class="fas fa-exchange-alt"></i> Əvəzləşdir
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Search functionality for company names
+document.addEventListener('input', function(e) {
+    if (e.target.id === 'companySearch') {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('table:first-of-type tbody tr');
+        
+        rows.forEach(row => {
+            const companyName = row.cells[0]?.textContent?.toLowerCase() || '';
+            if (companyName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('paymentModal');
+    const paymentForm = document.getElementById('paymentForm');
+    const modalCompanyNameInput = document.getElementById('modalCompanyName');
+    const displayPartyName = document.getElementById('displayPartyName');
+    const displayReceivable = document.getElementById('displayReceivable');
+    const displayDebt = document.getElementById('displayDebt');
+    const paymentTypeSelect = document.getElementById('paymentType');
+    const paymentAmountInput = document.getElementById('paymentAmount');
+    const cancelButton = document.getElementById('cancelPaymentButton');
+
+    document.querySelectorAll('.open-payment-modal').forEach(button => {
+        button.addEventListener('click', function() {
+            const partyName = this.getAttribute('data-party-name');
+            const totalReceivable = parseFloat(this.getAttribute('data-total-receivable'));
+            const totalDebt = parseFloat(this.getAttribute('data-total-debt'));
+            const netBalance = parseFloat(this.getAttribute('data-net-balance'));
+            
+            modalCompanyNameInput.value = partyName;
+            displayPartyName.textContent = partyName;
+            displayReceivable.textContent = totalReceivable.toFixed(2);
+            displayDebt.textContent = totalDebt.toFixed(2);
+            
+            if (totalDebt > totalReceivable && totalDebt > 0) {
+                paymentTypeSelect.value = 'debt_payment';
+                paymentAmountInput.max = totalDebt.toFixed(2);
+                paymentAmountInput.value = totalDebt.toFixed(2);
+            } else if (totalReceivable > 0) {
+                paymentTypeSelect.value = 'receivable_payment';
+                paymentAmountInput.max = totalReceivable.toFixed(2);
+                paymentAmountInput.value = totalReceivable.toFixed(2);
+            }
+            
+            modal.classList.add('open');
+        });
+    });
+
+    cancelButton.addEventListener('click', function() {
+        modal.classList.remove('open');
+        paymentForm.reset();
+    });
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('open');
+            paymentForm.reset();
+        }
+    });
+
+    paymentTypeSelect.addEventListener('change', function() {
+        const totalReceivable = parseFloat(displayReceivable.textContent);
+        const totalDebt = parseFloat(displayDebt.textContent);
+        
+        if (this.value === 'debt_payment') {
+            paymentAmountInput.max = totalDebt.toFixed(2);
+            paymentAmountInput.value = totalDebt > 0 ? totalDebt.toFixed(2) : '';
+        } else if (this.value === 'receivable_payment') {
+            paymentAmountInput.max = totalReceivable.toFixed(2);
+            paymentAmountInput.value = totalReceivable > 0 ? totalReceivable.toFixed(2) : '';
+        }
+    });
+
+    paymentForm.addEventListener('submit', function(e) {
+        const amount = parseFloat(paymentAmountInput.value) || 0;
+        const type = paymentTypeSelect.value;
+        
+        if (amount < 0.01) {
+            e.preventDefault();
+            alert('Məbləğ minimum 0.01 AZN olmalıdır!');
+            return false;
+        }
+        
+        if (!confirm(`${amount.toFixed(2)} AZN ödəniş/qəbul əməliyyatını təsdiqləyirsiniz?`)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const offsetModal = document.getElementById('offsetModal');
+    // Məntiqi xətanın qarşısını almaq üçün əlavə yoxlama:
+    if (!offsetModal) return; 
+
+    const offsetForm = document.getElementById('offsetForm');
+    const modalCompanyNameOffsetInput = document.getElementById('modalCompanyNameOffset');
+    const displayPartyNameOffset = document.getElementById('displayPartyNameOffset');
+    const displayReceivableOffset = document.getElementById('displayReceivableOffset');
+    const displayDebtOffset = document.getElementById('displayDebtOffset');
+    const offsetAmountInput = document.getElementById('offsetAmountInput');
+    const cancelOffsetButton = document.getElementById('cancelOffsetButton');
+
+    document.querySelectorAll('.open-offset-modal').forEach(button => {
+        button.addEventListener('click', function() {
+            const partyName = this.getAttribute('data-party-name');
+            const totalReceivable = parseFloat(this.getAttribute('data-total-receivable'));
+            const totalDebt = parseFloat(this.getAttribute('data-total-debt'));
+            
+            const maxOffset = Math.min(totalReceivable, totalDebt); // Həm borcun, həm də alacağın minimumu
+            
+            modalCompanyNameOffsetInput.value = partyName;
+            displayPartyNameOffset.textContent = partyName;
+            displayReceivableOffset.textContent = totalReceivable.toFixed(2);
+            displayDebtOffset.textContent = totalDebt.toFixed(2);
+            
+            offsetAmountInput.max = maxOffset.toFixed(2);
+            offsetAmountInput.value = maxOffset > 0 ? maxOffset.toFixed(2) : '';
+            
+            offsetModal.classList.add('open');
+        });
+    });
+
+    cancelOffsetButton.addEventListener('click', function() {
+        offsetModal.classList.remove('open');
+        offsetForm.reset();
+    });
+
+    offsetModal.addEventListener('click', function(e) {
+        if (e.target === offsetModal) {
+            offsetModal.classList.remove('open');
+            offsetForm.reset();
+        }
+    });
+
+    offsetForm.addEventListener('submit', function(e) {
+        const amount = parseFloat(offsetAmountInput.value) || 0;
+        const max = parseFloat(offsetAmountInput.max) || 0;
+        
+        if (amount < 0.01) {
+            e.preventDefault();
+            alert('Məbləğ minimum 0.01 AZN olmalıdır!');
+            return false;
+        }
+        
+        if (amount > max + 0.01) { // 0.01 fərq float xətalarını nəzərə almaq üçündür
+            e.preventDefault();
+            alert(`Daxil edilən məbləğ (${amount.toFixed(2)} AZN) maksimum əvəzləşdirmə məbləğindən (${max.toFixed(2)} AZN) çox ola bilməz!`);
+            return false;
+        }
+        
+        if (!confirm(`${amount.toFixed(2)} AZN məbləğində qarşılıqlı əvəzləşdirmə əməliyyatını təsdiqləyirsiniz?`)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+
+</body>
+</html>

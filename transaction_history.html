@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Əməliyyat Tarixçəsi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+      --border-radius: 8px;
+    }
+    body {
+      background-color: #f4f7f6; /* Açıq boz fon */
+      font-family: 'Poppins', sans-serif;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* Yumşaq kölgə */
+      padding: 30px;
+      margin-top: 40px;
+      margin-bottom: 60px;
+    }
+    h2 {
+      font-weight: 600;
+      color: #333;
+    }
+    .transaction-card {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 5px solid; /* Status rəngi ilə ayrılan cizgi */
+      transition: all 0.3s ease;
+    }
+    .transaction-card:hover {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .purchase {
+      border-left-color: var(--success-color);
+    }
+    .sale {
+      border-left-color: var(--danger-color);
+    }
+    .badge-transaction {
+      font-size: 0.85rem;
+      padding: 0.4em 0.8em;
+      font-weight: 600;
+    }
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-right: 15px;
+      font-size: 0.9rem;
+    }
+    .info-item strong {
+      font-weight: 600;
+    }
+    .text-detail {
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+    .pagination .page-link {
+        border-radius: 50% !important;
+        margin: 0 5px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+      <h2 class="mb-3 mb-md-0"><i class="bi bi-clock-history me-2"></i> Əməliyyat Tarixçəsi</h2>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary back-btn">
+          <i class="bi bi-arrow-left me-1"></i> Geri
+        </a>
+      </div>
+    </div>
+    
+    <!-- Advanced Search Form -->
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filterlər</h5>
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('transaction_history') }}" method="get" id="filterForm">
+          <input type="hidden" name="page" value="1">
+          
+          <div class="row g-3">
+            <!-- Search Term -->
+            <div class="col-md-4">
+              <label for="search" class="form-label">Açar söz</label>
+              <input type="text" class="form-control" id="search" name="search" 
+                     placeholder="Məhsul, qeyd, müştəri..." value="{{ request.args.get('search', '') }}">
+            </div>
+            
+            <!-- Transaction Type -->
+            <div class="col-md-3">
+              <label for="type" class="form-label">Əməliyyat növü</label>
+              <select class="form-select" id="type" name="type">
+                <option value="">Hamısı</option>
+                <option value="purchase" {% if request.args.get('type') == 'purchase' %}selected{% endif %}>Alış</option>
+                <option value="sale" {% if request.args.get('type') == 'sale' %}selected{% endif %}>Satış</option>
+              </select>
+            </div>
+            
+            <!-- Date Range -->
+            <div class="col-md-5">
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="start_date" class="form-label">Başlanğıc tarix</label>
+                  <input type="date" class="form-control" id="start_date" name="start_date" 
+                         value="{{ request.args.get('start_date', '') }}">
+                </div>
+                <div class="col-md-6">
+                  <label for="end_date" class="form-label">Bitmə tarixi</label>
+                  <div class="input-group">
+                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                           value="{{ request.args.get('end_date', '') }}">
+                    <button class="btn btn-outline-secondary" type="button" id="todayBtn">Bu gün</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Employee -->
+            <div class="col-md-3">
+              <label for="employee_id" class="form-label">Əməkdaş</label>
+              <select class="form-select" id="employee_id" name="employee_id">
+                <option value="">Hamısı</option>
+                {% for emp in employees %}
+                  <option value="{{ emp.id }}" {% if request.args.get('employee_id')|string == emp.id|string %}selected{% endif %}>
+                    {{ emp.username }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <!-- Amount Range -->
+            <div class="col-md-4">
+              <label for="min_amount" class="form-label">Məbləğ aralığı</label>
+              <div class="input-group">
+                <input type="number" step="0.01" class="form-control" id="min_amount" name="min_amount" 
+                       placeholder="Min" value="{{ request.args.get('min_amount', '') }}">
+                <span class="input-group-text">-</span>
+                <input type="number" step="0.01" class="form-control" id="max_amount" name="max_amount" 
+                       placeholder="Maks" value="{{ request.args.get('max_amount', '') }}">
+              </div>
+            </div>
+            
+            <!-- Product -->
+            <div class="col-md-3">
+              <label for="product_id" class="form-label">Məhsul</label>
+              <select class="form-select" id="product_id" name="product_id">
+                <option value="">Hamısı</option>
+                {% for product in products %}
+                  <option value="{{ product.id }}" {% if request.args.get('product_id')|string == product.id|string %}selected{% endif %}>
+                    {{ product.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="col-12">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-funnel me-1"></i> Tətbiq et
+                </button>
+                <a href="{{ url_for('transaction_history') }}" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i> Sıfırla
+                </a>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="page-info text-center mb-4 p-2 rounded bg-light">
+      Cəmi **{{ total_transactions }}** əməliyyat tapıldı. Səhifə **{{ current_page }}/{{ total_pages }}**
+    </div>
+    
+    {% if transactions %}
+      {% for t in transactions %}
+        <div class="transaction-card {{ 'purchase' if t.type == 'purchase' else 'sale' }}">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 class="mb-0">
+                {% if t.type == 'purchase' %}
+                  <span class="badge bg-success badge-transaction"><i class="bi bi-cart-plus me-1"></i> Alış</span>
+                {% else %}
+                  <span class="badge bg-danger badge-transaction"><i class="bi bi-cart-dash me-1"></i> Satış</span>
+                {% endif %}
+                <span class="ms-2 fw-bold text-dark">{{ t.product_name or 'Məhsul silinib' }}</span>
+              </h5>
+            </div>
+            <div class="text-end">
+                <div class="fw-bold fs-5 {{ 'text-success' if t.type == 'purchase' else 'text-danger' }}">
+                    {{ '%.2f'|format(t.total) }} AZN
+                </div>
+                <div class="text-detail">Cəmi məbləğ</div>
+            </div>
+          </div>
+          
+          <hr class="my-3">
+
+          <div class="row g-2 text-detail">
+            <div class="col-md-6 col-lg-3">
+              <div class="info-item"><i class="bi bi-calendar-event"></i> 
+                <strong>Tarix:</strong> {{ t.timestamp.strftime('%d.%m.%Y %H:%M') }}
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="info-item"><i class="bi bi-person"></i>
+                <strong>Əməkdaş:</strong> {{ t.employee_name }}
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="info-item"><i class="bi bi-calculator"></i>
+                <strong>Miqdar:</strong> {{ t.quantity }} {{ t.product_unit or 'ədəd' }}
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="info-item"><i class="bi bi-cash"></i>
+                <strong>Qiymət:</strong> {{ '%.2f'|format(t.price) }} AZN
+              </div>
+            </div>
+            {% if t.supplier_id %}
+              <div class="col-md-6 col-lg-3">
+                <div class="info-item"><i class="bi bi-truck"></i>
+                  <strong>Təchizatçı ID:</strong> {{ t.supplier_id }}
+                </div>
+              </div>
+            {% endif %}
+            {% if t.customer_name %}
+              <div class="col-md-6 col-lg-3">
+                <div class="info-item"><i class="bi bi-person-check"></i>
+                  <strong>Müştəri:</strong> {{ t.customer_name }}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          
+          {% if t.note %}
+            <div class="mt-3 p-2 bg-light rounded text-detail">
+              <i class="bi bi-sticky-fill me-1"></i> <strong>Qeyd:</strong> {{ t.note }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      
+      {% if total_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+              <a class="page-link" 
+                 href="{{ url_for('transaction_history', page=current_page-1, search=search_query if search_query else '') }}" 
+                 aria-label="Əvvəlki">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            
+            {% for p in range(1, total_pages + 1) %}
+              <li class="page-item {% if p == current_page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('transaction_history', page=p) }}">{{ p }}</a>
+              </li>
+            {% endfor %}
+            
+            <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+              <a class="page-link" 
+                 href="{{ url_for('transaction_history', page=current_page+1, search=search_query if search_query else '') }}" 
+                 aria-label="Növbəti">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      {% endif %}
+      
+    {% else %}
+      <div class="alert alert-info text-center p-4">
+        <i class="bi bi-info-circle-fill me-2"></i> Heç bir əməliyyat tapılmadı.
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterForm = document.getElementById('filterForm');
+      const todayBtn = document.getElementById('todayBtn');
+      
+      // Today button click handler
+      if (todayBtn) {
+        todayBtn.addEventListener('click', function() {
+          const today = new Date().toISOString().split('T')[0];
+          document.getElementById('end_date').value = today;
+        });
+      }
+      
+      // Set default date range if not set and no dates in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.has('start_date') && !urlParams.has('end_date')) {
+        const today = new Date();
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        document.getElementById('start_date').value = oneMonthAgo.toISOString().split('T')[0];
+        document.getElementById('end_date').value = today.toISOString().split('T')[0];
+      }
+      
+      // Handle pagination
+      document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const url = new URL(this.href);
+          const page = url.searchParams.get('page');
+          
+          if (page) {
+            const pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'page';
+            pageInput.value = page;
+            
+            // Remove existing page input if any
+            const existingPageInput = filterForm.querySelector('input[name="page"]');
+            if (existingPageInput) {
+              filterForm.removeChild(existingPageInput);
+            }
+            
+            filterForm.appendChild(pageInput);
+            filterForm.submit();
+          }
+        });
+      });
+      
+      // Handle form reset
+      document.querySelector('a[href="{{ url_for("transaction_history") }}"]')
+  ?.addEventListener('click', function(e) {
+    if (this.closest('form')) {
+      e.preventDefault();
+      filterForm.reset();
+
+      const today = new Date();
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+      document.getElementById('start_date').value =
+        oneMonthAgo.toISOString().split('T')[0];
+      document.getElementById('end_date').value =
+        today.toISOString().split('T')[0];
+
+      filterForm.submit();
+    }
+  });
+
+    });
+  </script>
+</body>
+</html>

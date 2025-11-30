@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borcların və Tələblərin İdarə Edilməsi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .btn-primary {
+            background-color: var(--secondary);
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-success {
+            background-color: var(--success);
+            border: none;
+        }
+        .btn-danger {
+            background-color: var(--danger);
+            border: none;
+        }
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+            border: none;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .balance-positive {
+            color: var(--success);
+            font-weight: bold;
+        }
+        .balance-negative {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        .balance-zero {
+            color: var(--dark);
+            font-weight: bold;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        .search-input {
+            padding-left: 40px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+        .modal-content {
+            border: none;
+            border-radius: 10px;
+        }
+        .modal-header {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .close {
+            color: white;
+            opacity: 1;
+        }
+        .nav-tabs .nav-link {
+            color: var(--dark);
+            font-weight: 500;
+            border: none;
+            padding: 10px 20px;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--secondary);
+            border-bottom: 3px solid var(--secondary);
+            background: none;
+        }
+        .badge {
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>
+                    Borcların və Tələblərin İdarə Edilməsi
+                </h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Ana Səhifə</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Borclar və Tələblər</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Search and Add New -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" class="form-control search-input" placeholder="Axtarış...">
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDebtModal">
+                    <i class="fas fa-plus-circle me-2"></i>Yeni Borc/Tələb
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">Ümumi Alacaq</h5>
+                        <h2 class="text-success">{{ "%0.2f"|format(totals.receivable) }} AZN</h2>
+                        <p class="text-muted">Müştərilərdən alınacaq məbləğ</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">Ümumi Borc</h5>
+                        <h2 class="text-danger">{{ "%0.2f"|format(totals.debt) }} AZN</h2>
+                        <p class="text-muted">Təchizatçılara ödəniləcək məbləğ</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">Xalis Balans</h5>
+                        <h2 class="{% if totals.balance > 0 %}text-success{% elif totals.balance < 0 %}text-danger{% else %}text-dark{% endif %}">
+                            {{ "%0.2f"|format(totals.balance) }} AZN
+                        </h2>
+                        <p class="text-muted">Ümumi balans vəziyyəti</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" id="debtTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
+                    Hamısı
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="receivables-tab" data-bs-toggle="tab" data-bs-target="#receivables" type="button" role="tab">
+                    Alacaqlar
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="debts-tab" data-bs-toggle="tab" data-bs-target="#debts" type="button" role="tab">
+                    Borclar
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="debtTabsContent">
+            <!-- All Debts Tab -->
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="debtsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tərəf Adı</th>
+                                        <th class="text-end">Alacaq (AZN)</th>
+                                        <th class="text-end">Borc (AZN)</th>
+                                        <th class="text-end">Xalis Balans</th>
+                                        <th class="text-center">Əməliyyatlar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for party in parties %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ party.party_name }}</strong>
+                                            {% if party.receivable > 0 and party.debt > 0 %}
+                                                <span class="badge bg-warning text-dark ms-2">Qarşılıqlı Öhdəlik</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">{{ "%0.2f"|format(party.receivable) }}</td>
+                                        <td class="text-end">{{ "%0.2f"|format(party.debt) }}</td>
+                                        <td class="text-end">
+                                            {% set balance = party.receivable - party.debt %}
+                                            <span class="{% if balance > 0 %}balance-positive{% elif balance < 0 %}balance-negative{% else %}balance-zero{% endif %}">
+                                                {{ "%0.2f"|format(balance) }} AZN
+                                                {% if balance > 0 %}
+                                                    <i class="fas fa-arrow-up ms-1"></i>
+                                                {% elif balance < 0 %}
+                                                    <i class="fas fa-arrow-down ms-1"></i>
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ url_for('debts_management', company_name=party.party_name, show_details=True) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if party.receivable > 0 and party.debt > 0 %}
+                                                <button class="btn btn-sm btn-outline-warning offset-debt" 
+                                                        data-party="{{ party.party_name }}"
+                                                        data-receivable="{{ party.receivable }}"
+                                                        data-debt="{{ party.debt }}">
+                                                    <i class="fas fa-exchange-alt"></i>
+                                                </button>
+                                                {% endif %}
+                                                <button class="btn btn-sm btn-outline-success add-payment" 
+                                                        data-party="{{ party.party_name }}"
+                                                        data-type="{{ 'debt' if party.debt > party.receivable else 'receivable' }}">
+                                                    <i class="fas fa-money-bill-wave"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Receivables Tab -->
+            <div class="tab-pane fade" id="receivables" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tarix</th>
+                                        <th>Tərəf Adı</th>
+                                        <th class="text-end">Məbləğ (AZN)</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Əməliyyatlar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in receivables %}
+                                    <tr>
+                                        <td>{{ item.created_at }}</td>
+                                        <td>{{ item.party_name }}</td>
+                                        <td class="text-end">{{ "%0.2f"|format(item.amount) }}</td>
+                                        <td class="text-center">
+                                            {% if item.status == 'Ödənilib' %}
+                                                <span class="badge bg-success">{{ item.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">{{ item.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Debts Tab -->
+            <div class="tab-pane fade" id="debts" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tarix</th>
+                                        <th>Tərəf Adı</th>
+                                        <th class="text-end">Məbləğ (AZN)</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-center">Əməliyyatlar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in debts %}
+                                    <tr>
+                                        <td>{{ item.created_at }}</td>
+                                        <td>{{ item.party_name }}</td>
+                                        <td class="text-end">{{ "%0.2f"|format(item.amount) }}</td>
+                                        <td class="text-center">
+                                            {% if item.status == 'Ödənilib' %}
+                                                <span class="badge bg-success">{{ item.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">{{ item.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Debt/Receivable Modal -->
+    <div class="modal fade" id="addDebtModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Borc/Tələb Əlavə Et</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('debts_management') }}" method="POST">
+                    <input type="hidden" name="action" value="add">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tərəf Adı</label>
+                            <input type="text" class="form-control" name="party_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Növü</label>
+                            <select class="form-select" name="type" required>
+                                <option value="debt">Borc (Bizə ödənilməlidir)</option>
+                                <option value="credit">Tələb (Biz ödəməliyik)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Məbləğ (AZN)</label>
+                            <input type="number" step="0.01" min="0.01" class="form-control" name="initial_amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Son Ödəniş Tarixi</label>
+                            <input type="date" class="form-control" name="due_date">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Qeyd</label>
+                            <textarea class="form-control" name="description" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                        <button type="submit" class="btn btn-primary">Yadda Saxla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ödəniş Əlavə Et</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="paymentForm" action="{{ url_for('debts_management') }}" method="POST">
+                    <input type="hidden" name="action" value="add_payment">
+                    <input type="hidden" name="party_name" id="paymentPartyName">
+                    <input type="hidden" name="type" id="paymentType">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Ödənilən Məbləğ (AZN)</label>
+                            <input type="number" step="0.01" min="0.01" class="form-control" name="amount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ödəniş Tarixi</label>
+                            <input type="date" class="form-control" name="payment_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ödəniş Metodu</label>
+                            <select class="form-select" name="payment_method" required>
+                                <option value="nağd">Nağd</option>
+                                <option value="kart">Kart</option>
+                                <option value="köçürmə">Köçürmə</option>
+                                <option value="digər">Digər</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Qeyd</label>
+                            <textarea class="form-control" name="description" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                        <button type="submit" class="btn btn-success">Ödənişi Təsdiqlə</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offset Debts Modal -->
+    <div class="modal fade" id="offsetDebtModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">Qarşılıqlı Öhdəlikləri Balanslaşdır</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="offsetForm" action="{{ url_for('offset_mutual_debts') }}" method="POST">
+                    <input type="hidden" name="party_name" id="offsetPartyName">
+                    <div class="modal-body">
+                        <p class="mb-3"><strong>Tərəf:</strong> <span id="offsetParty"></span></p>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Alacaq</h6>
+                                        <h4 class="text-success" id="receivableAmount">0.00 AZN</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Borc</h6>
+                                        <h4 class="text-danger" id="debtAmount">0.00 AZN</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Qarşılıqlı öhdəliklər balanslaşdırılacaq. Bu əməliyyat geri alına bilməz.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                        <button type="submit" class="btn btn-warning">Balanslaşdır</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalTitle">Detallar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailsModalBody">
+                    <!-- Details will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Search functionality
+        $(document).ready(function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                var value = $(this).val().toLowerCase();
+                $('#debtsTable tbody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Handle payment modal
+            $('.add-payment').on('click', function() {
+                var partyName = $(this).data('party');
+                var type = $(this).data('type');
+                $('#paymentPartyName').val(partyName);
+                $('#paymentType').val(type);
+                
+                // Set today's date as default
+                var today = new Date().toISOString().split('T')[0];
+                $('input[name="payment_date"]').val(today);
+                
+                // Reset form and show modal
+                $('#paymentForm')[0].reset();
+                var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                paymentModal.show();
+            });
+
+            // Handle offset debt modal
+            $('.offset-debt').on('click', function() {
+                var partyName = $(this).data('party');
+                var receivable = parseFloat($(this).data('receivable'));
+                var debt = parseFloat($(this).data('debt'));
+                
+                $('#offsetPartyName').val(partyName);
+                $('#offsetParty').text(partyName);
+                $('#receivableAmount').text(receivable.toFixed(2) + ' AZN');
+                $('#debtAmount').text(debt.toFixed(2) + ' AZN');
+                
+                var offsetModal = new bootstrap.Modal(document.getElementById('offsetDebtModal'));
+                offsetModal.show();
+            });
+
+            // Handle view details
+            $('.view-details').on('click', function() {
+                var partyName = $(this).data('party');
+                $('#detailsModalTitle').text(partyName + ' - Detallar');
+                
+                // Load details via AJAX
+                $.get('/api/debts/details/' + encodeURIComponent(partyName), function(data) {
+                    $('#detailsModalBody').html(data);
+                    var detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                    detailsModal.show();
+                });
+            });
+
+            // Initialize DataTables if needed
+            if ($.fn.DataTable) {
+                $('#debtsTable').DataTable({
+                    responsive: true,
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/English.json'
+                    },
+                    order: [[0, 'asc']],
+                    pageLength: 25
+                });
+            }
+        });
+    </script>
+</body>
+</html>

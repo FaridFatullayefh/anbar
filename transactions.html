@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anbar Əməliyyatları</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+    /* 🚀 İNKİŞAF ETDİRİLMİŞ QLOBAL CSS VƏ RƏNGLƏR */
+    :root {
+      --primary-color: #2c3e50; /* Tünd Boz-Mavi */
+      --secondary-color: #3498db; /* Açıq Mavi */
+      --purchase-color: #2ecc71; /* Yaşıl */
+      --sale-color: #e74c3c; /* Qırmızı */
+      --gray-color: #95a5a6; /* Orta Boz */
+      --light-bg: #ecf0f1; /* Çox Açıq Boz */
+      --white: #ffffff;
+      --border-color: #bdc3c7; /* Açıq Boz Sərhəd */
+      --light-text: #7f8c8d;
+      --alert-success-bg: #d4edda;
+      --alert-danger-bg: #f8d7da;
+      --info-panel-bg: #e9f7ff;
+      --readonly-bg: #f5f7f9; /* Daha Yumşaq Readonly Rəng */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif; /* Daha müasir font */
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      padding: 30px 15px;
+      color: var(--primary-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px; /* Bir qədər genişləndirildi */
+      margin: 0 auto;
+      background: var(--white);
+      border: none; /* Sərhəd əvəzinə kölgə istifadə edirik */
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Yumşaq kölgə */
+      padding: 40px;
+      transition: all 0.4s ease;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.4em;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+    
+    .section-header h3 {
+        color: var(--secondary-color);
+        font-size: 1.6em;
+        margin-bottom: 5px;
+    }
+    .section-header p {
+        color: var(--gray-color);
+        margin-bottom: 15px;
+        font-size: 0.95em;
+    }
+
+    .form-section {
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      background-color: var(--white);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    label {
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 6px;
+      font-size: 0.85em;
+      text-transform: uppercase;
+      display: block;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    input[type="text"], input[type="number"], select, textarea {
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95em;
+      width: 100%;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Focus effekti */
+        outline: none;
+    }
+
+    .readonly-field {
+        background-color: var(--readonly-bg);
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    /* 🎨 FORM GRID VƏ LAYOUT */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+    }
+    
+    /* Məhsul Siyahısı Konteyneri */
+    #purchase_products_container, #sale_products_container {
+        grid-column: 1 / -1; /* Bütün eni tutur */
+        background-color: var(--light-bg);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px dashed var(--border-color);
+    }
+
+    .product-row {
+      margin-bottom: 10px;
+      padding: 15px;
+      background-color: var(--white);
+      border-radius: 8px;
+      border-left: 5px solid var(--secondary-color);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .product-row > div {
+        /* Məhsul adı, Miqdar, Mövcud, Qiymət, Cəmi, Sil */
+        display: grid; 
+        grid-template-columns: 2fr 1fr 1fr 1fr 1fr 40px;
+        gap: 10px; 
+        align-items: center;
+        font-size: 0.9em;
+    }
+    
+    .product-total {
+        background-color: var(--readonly-bg) !important;
+        font-weight: bold;
+    }
+
+    .purchase-submit, .sale-submit {
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 1.1em;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: background-color 0.3s, transform 0.2s;
+      margin-top: 20px;
+    }
+    
+    .purchase-submit {
+        background-color: var(--purchase-color);
+    }
+    .sale-submit {
+        background-color: var(--sale-color);
+    }
+
+    .purchase-submit:hover {
+      background-color: #27ae60;
+      transform: translateY(-1px);
+    }
+    .sale-submit:hover {
+      background-color: #c0392b;
+      transform: translateY(-1px);
+    }
+    
+    .purchase-submit:disabled, .sale-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    /* 🔍 CUSTOM AUTOCOMPLETE STILLƏRİ */
+    .autocomplete-container {
+        position: relative;
+        width: 100%;
+    }
+
+    #purchase_autocomplete_results {
+        position: absolute;
+        z-index: 100;
+        max-height: 280px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        background-color: var(--white);
+        width: 100%;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .autocomplete-item {
+        padding: 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f3f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95em;
+        transition: background-color 0.2s;
+    }
+
+    .autocomplete-item:hover {
+        background-color: var(--info-panel-bg);
+    }
+    
+    .item-stock {
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 0.85em;
+        min-width: 110px;
+        text-align: center;
+        letter-spacing: 0.3px;
+    }
+    
+    .stock-ok { 
+        background-color: var(--purchase-color); 
+        color: var(--white);
+    }
+    .stock-low { 
+        background-color: var(--sale-color); 
+        color: var(--white);
+    }
+    .stock-zero { 
+        background-color: #f1c40f; /* Sarı */
+        color: var(--primary-color);
+    }
+    
+    .item-sku {
+        font-size: 0.8em;
+        color: var(--gray-color);
+        margin-left: 8px;
+    }
+    
+    /* ➕ ƏLAVƏ ET DÜYMƏSİ */
+    .autocomplete-container button {
+        background: var(--secondary-color) !important;
+        transition: background-color 0.3s;
+    }
+    .autocomplete-container button:hover {
+        background: #2980b9 !important;
+    }
+    
+    /* 📝 DİGƏR YENİLƏMƏLƏR */
+    .back-link {
+        display: inline-block;
+        margin-top: 30px;
+        text-decoration: none;
+        color: var(--secondary-color);
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .back-link:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+    
+    .messages {
+        margin-bottom: 20px;
+    }
+    .messages ul {
+        list-style: none;
+        padding: 0;
+    }
+    .messages li {
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+    .success-message {
+        background-color: var(--alert-success-bg);
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .error-message {
+        background-color: var(--alert-danger-bg);
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    /* Satış formundakı Select-in stili */
+    .product-select {
+        min-height: 150px !important; 
+        padding: 10px;
+    }
+
+    /* Modal Stili */
+    #newProductModal > div {
+        background: white; 
+        padding: 35px; 
+        border-radius: 12px; 
+        width: 95%; 
+        max-width: 550px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Anbar Əməliyyatları</h2>
+     <a href="{{ url_for('transaction_history') }}"
+   style="
+     display:inline-flex;
+     align-items:center;
+     gap:6px;
+     padding:8px 16px;
+     border-radius:10px;
+     font-weight:500;
+     font-size:15px;
+     color:#0d6efd;
+     background:#ffffff;
+     border:1.8px solid #0d6efd;
+     transition:all 0.25s ease;
+     text-decoration:none;
+   "
+   onmouseover="this.style.background='#0d6efd'; this.style.color='white'; this.style.boxShadow='0 4px 14px rgba(13,110,253,0.25)'; this.style.transform='translateY(-1px)';"
+   onmouseout="this.style.background='#ffffff'; this.style.color='#0d6efd'; this.style.boxShadow='none'; this.style.transform='none';"
+   onmousedown="this.style.transform='scale(0.98)'"
+   onmouseup="this.style.transform='translateY(-1px)'"
+>
+    <i class="bi bi-clock-history"></i> Əməliyyat Tarixçəsi
+</a>
+
+    </div>
+    
+    <div class="messages">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul>
+          {% for category, message in messages %}
+            <li class="{% if category=='success' %}success-message{% else %}error-message{% endif %}">{{ message }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Alış Əməliyyatı</h3>
+        <p>Məhsul alışını qeyd edin. Stok avtomatik artırılır.</p>
+      </div>
+      <form method="POST" action="{{ url_for('transactions') }}" onsubmit="return validateForm('purchase')" class="transaction-form" id="purchaseForm">
+        <input type="hidden" name="transaction_type" value="purchase">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="supplier_select">Təchizatçı:</label>
+            <select id="supplier_select" name="supplier_id" class="form-control" required>
+              <option value="" disabled selected>Təchizatçı seçin</option>
+              {% for supplier in suppliers %}
+                <option value="{{ supplier.id }}">{{ supplier.name }}{% if supplier.contact_person %} ({{ supplier.contact_person }}){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="form-group" style="grid-column: span 1;">
+            <label for="purchase_product_input">Məhsul:</label>
+            <div class="autocomplete-container">
+                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                    <input type="text" 
+                           id="purchase_product_input" 
+                           style="flex-grow: 1;" 
+                           placeholder="Məhsulun adını və ya məhsul kodunu -nu daxil edin"
+                           oninput="handleAutocomplete('purchase')"
+                           autocomplete="off">
+                    
+                    <button type="button" onclick="addProductFromInput('purchase')" style="align-self: flex-start; padding: 8px 12px; background: var(--secondary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Əlavə et
+                    </button>
+                </div>
+                <div id="purchase_autocomplete_results"></div>
+            </div>
+            
+            <div id="purchase_stock_info" style="margin-top: 10px; font-size: 0.9em; font-weight: 600; min-height: 20px;">
+                <span style="color: var(--gray-color);">Axtarışa başlayın.</span>
+            </div>
+            
+            <small>Məhsulu siyahıdan seçin və ya adını daxil edib 'Əlavə et' düyməsini basın.</small>
+          </div>
+          
+          <div id="purchase_products_container" class="form-group" style="grid-column: span 2;">
+          </div>
+          
+          <div class="form-group">
+            <label for="purchase_total">Ümumi məbləğ ({{ 'AZN' if session.get('currency', 'AZN') == 'AZN' else 'USD' }}):</label>
+            <input type="number" id="purchase_total" name="total" step="0.01" min="0" readonly class="readonly-field total-amount" value="0">
+          </div>
+          
+          <div class="form-group">
+            <label for="purchase_paid_amount">Ödənilən məbləğ ({{ 'AZN' if session.get('currency', 'AZN') == 'AZN' else 'USD' }}):</label>
+            <input type="number" id="purchase_paid_amount" name="paid_amount" step="0.01" min="0" value="0" oninput="calculateRemaining('purchase')">
+          </div>
+          
+          <div class="form-group">
+            <label for="purchase_remaining_amount">Qalıq ({{ 'AZN' if session.get('currency', 'AZN') == 'AZN' else 'USD' }}):</label>
+            <input type="number" id="purchase_remaining_amount" step="0.01" readonly class="readonly-field" value="0">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="purchase_note">Qeyd:</label>
+          <textarea id="purchase_note" name="purchase_note" rows="2"></textarea>
+        </div>
+        
+        <button type="submit" class="purchase-submit">Alışı təsdiqlə</button>
+      </form>
+    </div>
+    
+    <div class="form-section">
+      <div class="section-header">
+        <h3>Satış Əməliyyatı</h3>
+        <p>Məhsul satışını qeyd edin. Stok avtomatik azaldılır.</p>
+      </div>
+      <form method="POST" action="{{ url_for('transactions') }}" onsubmit="return validateForm('sale')" class="transaction-form" id="saleForm">
+        <input type="hidden" name="transaction_type" value="sale">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="sale_customer">Müştəri:</label>
+            <input type="text" id="sale_customer" name="customer_name" list="customer_list" required>
+            <datalist id="customer_list">
+              {% for customer in customers %}
+                <option value="{{ customer.name }}">
+              {% endfor %}
+            </datalist>
+          </div>
+          
+          <div class="form-group">
+            <label for="sale_product">Məhsul:</label>
+            <select id="sale_product" class="product-select" multiple style="height: 120px;" onchange="updateSelectedProducts('sale')">
+              {% for product in products %}
+                {% if product.stock > 0 %}
+                  <option value="{{ product.id }}" data-price="{{ product.price }}" data-stock="{{ product.stock }}" data-unit="{{ product.unit }}" data-name="{{ product.name }}">
+                    {{ product.name }} ({{ product.sku }}) - {{ product.stock }} {{ product.unit }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <small>Çoxlu seçim üçün Ctrl (Windows) basıb saxlayaraq seçim edin</small>
+          </div>
+          
+          <div id="sale_products_container" class="form-group" style="grid-column: span 2;">
+          </div>
+          
+          <div class="form-group">
+            <label for="sale_total">Ümumi məbləğ ({{ 'AZN' if session.get('currency', 'AZN') == 'AZN' else 'USD' }}):</label>
+            <input type="number" id="sale_total" name="total" step="0.01" min="0" readonly class="readonly-field total-amount" value="0">
+          </div>
+          
+          <div class="form-group">
+            <label for="sale_paid_amount">Ödənilən məbləğ ({{ 'AZN' if session.get('currency', 'AZN') == 'AZN' else 'USD' }}):</label>
+            <input type="number" id="sale_paid_amount" name="paid_amount" step="0.01" min="0" value="0" oninput="calculateRemaining('sale')">
+          </div>
+          
+          <div class="form-group">
+            <label for="sale_remaining_amount">Qalıq ({{ 'AZN' if session.get('currency', 'AZN') == 'AZN' else 'USD' }}):</label>
+            <input type="number" id="sale_remaining_amount" step="0.01" readonly class="readonly-field" value="0">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="sale_note">Qeyd:</label>
+          <textarea id="sale_note" name="sale_note" rows="2"></textarea>
+        </div>
+        
+        <button type="submit" class="sale-submit">Satışı təsdiqlə</button>
+      </form>
+    </div>
+
+
+    <a href="{{ url_for('index') }}" class="back-link">Geri</a>
+  </div>
+
+  <div id="newProductModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px;">
+      <h3 style="margin-top: 0;">Yeni Məhsul Əlavə Et</h3>
+      <div style="display: grid; gap: 15px;">
+        <div>
+          <label for="new_product_name">Məhsulun Adı:</label>
+          <input type="text" id="new_product_name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+        </div>
+        <div>
+          <label for="new_product_category">Kateqoriya:</label>
+          <input type="text" id="new_product_category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" value="Digər" required>
+        </div>
+        <div>
+          <label for="new_product_unit">Vahid:</label>
+          <select id="new_product_unit" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+            <option value="ədəd">ədəd</option>
+            <option value="kq">kq</option>
+            <option value="ton">ton</option>
+            <option value="litr">litr</option>
+            <option value="metr">metr</option>
+            <option value="metr kvadrat">metr kvadrat</option>
+            <option value="metr kub">metr kub</option>
+            <option value="rulu">rulu</option>
+            <option value="qablaşdırma">qablaşdırma</option>
+            <option value="dəst">dəst</option>
+            <option value="qutu">qutu</option>
+            <option value="bağlama">bağlama</option>
+            <option value="paket">paket</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+          <button onclick="closeNewProductModal()" type="button" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Ləğv et</button>
+          <button onclick="addNewProduct()" type="button" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Əlavə et</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <script>
+    // Flask-dan gələn məhsul məlumatlarını JavaScript üçün yükləyirik
+    const GLOBAL_PRODUCTS = JSON.parse('{{ products | tojson | safe }}');
+    let currentFormType = 'purchase';
+    
+    console.log('Script loaded');
+    console.log('Initial currentFormType:', currentFormType);
+    let selectedProductData = null; 
+
+    // ====================================================================
+    // 1. Custom Autocomplete Vəziyyətini İdarəetmə (PURCHASE FORM)
+    // ====================================================================
+
+    function handleAutocomplete(formType) {
+        if (formType !== 'purchase') return;
+
+        const input = document.getElementById('purchase_product_input');
+        const resultsDiv = document.getElementById('purchase_autocomplete_results');
+        const infoDiv = document.getElementById('purchase_stock_info');
+        const enteredValue = input.value.trim().toLowerCase();
+        
+        resultsDiv.innerHTML = '';
+        infoDiv.innerHTML = '';
+        selectedProductData = null;
+
+        if (enteredValue.length < 2) {
+            resultsDiv.style.display = 'none';
+            infoDiv.innerHTML = `<span style="color: var(--gray-color);">Axtarışa başlayın.</span>`;
+            return;
+        }
+
+        const filteredProducts = GLOBAL_PRODUCTS.filter(product => 
+            product.name.toLowerCase().includes(enteredValue) ||
+            product.sku.toLowerCase().includes(enteredValue)
+        );
+
+        if (filteredProducts.length > 0) {
+            resultsDiv.style.display = 'block';
+            
+            filteredProducts.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                
+                let stockStatusClass;
+                // Qeyd: Python kodu stock'u float etdiyi üçün burada birbaşa müqayisə edə bilərik.
+                if (product.stock > 10) {
+                    stockStatusClass = 'stock-ok';
+                } else if (product.stock > 0) {
+                    stockStatusClass = 'stock-zero'; // Az sayda stok sarı rənglə
+                } else {
+                    stockStatusClass = 'stock-low'; // Stok yoxdur qırmızı rənglə
+                }
+                
+                const stockText = `${product.stock} ${product.unit}`;
+                
+                item.innerHTML = `
+                    <span>${product.name} <span class="item-sku">(Mehsul kodu: ${product.sku})</span></span>
+                    <span class="item-stock ${stockStatusClass}">
+                        ${product.stock > 0 ? stockText : 'STOK SIFIR!'}
+                    </span>
+                `;
+                
+                item.onclick = () => selectAutocompleteItem(product, formType);
+                resultsDiv.appendChild(item);
+            });
+            
+            infoDiv.innerHTML = `<span style="color: #0d6efd;">${filteredProducts.length} məhsul tapıldı.</span>`;
+        } else {
+            resultsDiv.style.display = 'none';
+            infoDiv.innerHTML = `<span style="color: var(--sale-color);">Məhsul bazada yoxdur. Yeni məhsul kimi əlavə etmək üçün 'Əlavə et' düyməsini basın.</span>`;
+        }
+    }
+
+    function selectAutocompleteItem(product, formType) {
+        const input = document.getElementById(`${formType}_product_input`);
+        const resultsDiv = document.getElementById(`${formType}_autocomplete_results`);
+        const infoDiv = document.getElementById(`${formType}_stock_info`);
+        
+        // Inputu məhsul adı ilə doldur
+        input.value = product.name;
+        
+        // Məhsul məlumatını global dəyişkənə yaz
+        selectedProductData = product;
+        
+        // Nəticələri gizlət və məlumatı göstər
+        resultsDiv.style.display = 'none';
+        infoDiv.innerHTML = `
+            <span style="color: var(--purchase-color);">✅ Seçildi!</span>
+            | Mehsul kodu: ${product.sku} | Stok: ${product.stock} ${product.unit}
+        `;
+    }
+
+    document.addEventListener('click', function(e) {
+        const resultsDiv = document.getElementById('purchase_autocomplete_results');
+        const input = document.getElementById('purchase_product_input');
+        
+        // Autocomplete divindən kənarda klik olduqda siyahını bağlayır
+        if (e.target !== resultsDiv && e.target !== input && !e.target.closest('.autocomplete-item')) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+
+    // ====================================================================
+    // 2. Yeni Məhsul Inputundan Məhsul Əlavə Etmə (PURCHASE FORM ÜÇÜN)
+    // ====================================================================
+    function addProductFromInput(formType) {
+        if (formType !== 'purchase') return;
+
+        const input = document.getElementById(`${formType}_product_input`);
+        const productName = input.value.trim();
+        const container = document.getElementById(`${formType}_products_container`);
+
+        if (!productName) {
+            alert('Zəhmət olmasa məhsulun adını daxil edin.');
+            return;
+        }
+
+        let productToAdd = null;
+        
+        // 1. Əvvəlcə Autocomplete ilə seçilmiş datanı yoxla
+        if (selectedProductData && selectedProductData.name.toLowerCase() === productName.toLowerCase()) {
+             productToAdd = selectedProductData;
+        } 
+        
+        // 2. Əgər seçilməyibsə, amma ad match edirsə
+        if (!productToAdd) {
+            productToAdd = GLOBAL_PRODUCTS.find(p => p.name.toLowerCase() === productName.toLowerCase());
+        }
+
+        // 3. Əgər məhsul tapılıbsa (mövcud məhsuldur)
+        if (productToAdd) {
+             if (container.querySelector(`.product-row[data-product-id='${productToAdd.id}']`)) {
+                alert(`"${productName}" artıq siyahıya əlavə olunub.`);
+                input.value = '';
+                selectedProductData = null;
+                document.getElementById('purchase_stock_info').innerHTML = `<span style="color: var(--gray-color);">Məlumat yoxdur.</span>`;
+                return;
+            }
+            addSelectedProductRow(
+                formType, 
+                productToAdd.id, 
+                productToAdd.name, 
+                productToAdd.price, 
+                productToAdd.stock, 
+                productToAdd.unit, 
+                false
+            );
+        } else {
+                    // 4. Əgər məhsul YENİ isə, modalı aç
+            showNewProductModal(formType);
+            document.getElementById('new_product_name').value = productName;
+        }
+        
+        input.value = ''; 
+        selectedProductData = null;
+        document.getElementById('purchase_autocomplete_results').innerHTML = '';
+        document.getElementById('purchase_stock_info').innerHTML = `<span style="color: var(--gray-color);">Axtarışa başlayın.</span>`;
+        calculateTotal(formType);
+    }
+    
+    // ====================================================================
+    // 3. Digər JS Funksiyaları (Əvvəlki cavablardan)
+    // ====================================================================
+
+    // Satış Formundan Məhsul Əlavə Etmə
+    function updateSelectedProducts(formType) {
+        if (formType !== 'sale') return; 
+        
+        const select = document.getElementById(`${formType}_product`);
+        const container = document.getElementById(`${formType}_products_container`);
+        const selectedOptions = Array.from(select.selectedOptions);
+        const existingProductIds = Array.from(container.querySelectorAll('.product-row')).map(row => row.dataset.productId);
+        
+        selectedOptions.forEach(option => {
+            const productId = option.value;
+            if (!existingProductIds.includes(productId)) {
+                const productName = option.getAttribute('data-name');
+                const price = parseFloat(option.getAttribute('data-price')) || 0;
+                const stock = parseFloat(option.getAttribute('data-stock')) || 0;
+                const unit = option.getAttribute('data-unit') || '';
+                
+                addSelectedProductRow(formType, productId, productName, price, stock, unit, false);
+            }
+        });
+        
+        Array.from(container.querySelectorAll('.product-row')).forEach(row => {
+            const rowProductId = row.dataset.productId;
+            const isStillSelected = selectedOptions.some(option => option.value === rowProductId);
+            
+            if (!isStillSelected && row.dataset.isNew !== 'true') { 
+                row.remove();
+            }
+        });
+        
+        updateProductInputs(formType);
+        calculateTotal(formType);
+    }
+
+    // Row Yaratma
+    function addSelectedProductRow(formType, productId, productName, price, stock, unit, isNew, category = 'Digər') {
+        const container = document.getElementById(`${formType}_products_container`);
+        
+        if (container.querySelector(`.product-row[data-product-id='${productId}']`)) {
+            return;
+        }
+        
+        const row = document.createElement('div');
+        row.className = 'product-row';
+        row.dataset.productId = productId;
+        
+        if (isNew) {
+            row.dataset.isNew = 'true';
+            row.dataset.productName = productName;
+            row.dataset.unit = unit;
+            row.dataset.category = category;
+        }
+
+        row.innerHTML = `
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 40px; gap: 10px; align-items: center;">
+                <div>${productName} ${isNew ? ' (Yeni)' : ''}</div>
+                <div>
+                    <input type="number" class="product-quantity" 
+                           data-product-id="${productId}" 
+                           step="0.001" min="0.001" value="1" 
+                           oninput="calculateTotal('${formType}')" 
+                           style="width: 100%; padding: 5px;">
+                    <small>${unit}</small>
+                </div>
+                <div>${isNew ? 'Yeni məhsul' : `Mövcud: ${stock}`}</div>
+                <div>
+                    <input type="number" class="product-price" 
+                           data-product-id="${productId}" 
+                           step="0.01" min="0" value="${price.toFixed(2)}" 
+                           oninput="calculateTotal('${formType}')"
+                           style="width: 100%; padding: 5px;">
+                    <small>${formType === 'purchase' ? 'Alış' : 'Satış'} Qiyməti</small>
+                </div>
+                <div>
+                    <input type="number" class="product-total" 
+                           data-product-id="${productId}" 
+                           readonly 
+                           style="width: 100%; padding: 5px; background-color: #f1f3f5; border: 1px solid #dee2e6;" 
+                           value="${(1 * price).toFixed(2)}">
+                    <small>Cəmi</small>
+                </div>
+                <button type="button" onclick="removeProductRow(this, '${formType}')" style="background: var(--sale-color); color: white; border: none; padding: 5px; border-radius: 4px; cursor: pointer;">X</button>
+            </div>
+        `;
+        container.appendChild(row);
+        updateProductInputs(formType); 
+    }
+    
+    // Row Silmə
+    function removeProductRow(button, formType) {
+        const row = button.closest('.product-row');
+        const productIdToRemove = row.dataset.productId;
+        
+        if (formType === 'sale') {
+            const select = document.getElementById('sale_product');
+            const optionToRemove = select.querySelector(`option[value="${productIdToRemove}"]`);
+            if (optionToRemove) {
+                optionToRemove.selected = false;
+            }
+        }
+        
+        row.remove();
+        updateProductInputs(formType);
+        calculateTotal(formType);
+    }
+    
+    // Məbləğləri Hesablama
+    function calculateTotal(formType) {
+      let total = 0;
+      document.querySelectorAll(`#${formType}_products_container .product-row`).forEach(row => {
+        const quantity = parseFloat(row.querySelector('.product-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.product-price').value) || 0;
+        const rowTotal = quantity * price;
+        row.querySelector('.product-total').value = rowTotal.toFixed(2);
+        total += rowTotal;
+      });
+      
+      document.getElementById(`${formType}_total`).value = total.toFixed(2);
+      calculateRemaining(formType);
+      updateProductInputs(formType); 
+    }
+
+    // Qalıq Məbləği Hesablama
+    function calculateRemaining(formType) {
+      const total = parseFloat(document.getElementById(`${formType}_total`).value) || 0;
+      const paid = parseFloat(document.getElementById(`${formType}_paid_amount`).value) || 0;
+      const remaining = total - paid;
+      document.getElementById(`${formType}_remaining_amount`).value = remaining.toFixed(2);
+    }
+    
+    // Form Validasiyası və Göndərmə
+    function validateForm(formType) {
+      const form = document.getElementById(`${formType}Form`);
+      const submitButton = form.querySelector('button[type="submit"]');
+      
+      updateProductInputs(formType);
+      
+      const productCount = document.querySelectorAll(`#${formType}_products_container .product-row`).length;
+      if (productCount === 0) {
+        alert('Ən azı bir məhsul seçməlisiniz!');
+        return false;
+      }
+      
+      submitButton.disabled = true;
+      return true;
+    }
+
+    // JSON Data Yenilənməsi
+    function updateProductInputs(formType) {
+        const form = document.getElementById(`${formType}Form`);
+        form.querySelectorAll(`input[name^="${formType}_products"]`).forEach(el => el.remove());
+        const container = document.getElementById(`${formType}_products_container`);
+        const productRows = Array.from(container.querySelectorAll('.product-row'));
+        const selectedProductsData = [];
+        
+        productRows.forEach((row) => {
+            const productId = row.dataset.productId;
+            const quantity = parseFloat(row.querySelector('.product-quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.product-price').value) || 0;
+            
+            const item = { id: productId, quantity: quantity, price: price };
+            
+            if (row.dataset.isNew === 'true') {
+                item.is_new = true;
+                item.product_name = row.dataset.productName;
+                item.category = row.dataset.category;
+                item.unit = row.dataset.unit;
+            }
+            selectedProductsData.push(item);
+        });
+        
+        const jsonInput = document.createElement('input');
+        jsonInput.type = 'hidden';
+        jsonInput.name = `${formType}_products_json`;
+        jsonInput.value = JSON.stringify(selectedProductsData);
+        form.appendChild(jsonInput);
+    }
+
+    // Modal Funksiyaları
+    function closeNewProductModal() {
+        document.getElementById('newProductModal').style.display = 'none';
+        document.getElementById('new_product_name').value = '';
+    }
+
+    function addNewProduct() {
+        console.log('addNewProduct called');
+        const name = document.getElementById('new_product_name').value.trim();
+        const category = document.getElementById('new_product_category').value.trim();
+        const unit = document.getElementById('new_product_unit').value;
+        const price = 0;  // Default price
+        const quantity = 0;  // Default quantity
+
+        console.log('Form values:', {name, category, unit, currentFormType});
+
+        if (!name) {
+            console.log('No name provided');
+            alert('Zəhmət olmasa məhsulun adını daxil edin!');
+            return;
+        }
+
+        const tempId = 'new_' + Date.now(); 
+        console.log('Calling addSelectedProductRow with:', {currentFormType, tempId, name, price, quantity, unit});
+        
+        try {
+            addSelectedProductRow(currentFormType, tempId, name, price, quantity, unit, true, category);
+            console.log('Product row added successfully');
+        } catch (error) {
+            console.error('Error in addSelectedProductRow:', error);
+            alert('Xəta baş verdi: ' + error.message);
+            return;
+        }
+        
+        closeNewProductModal();
+        document.getElementById('new_product_name').value = '';  // Clear the name field for next entry
+    }
+
+
+    // Function to show the new product modal
+    function showNewProductModal(formType) {
+        console.log('showNewProductModal called with formType:', formType);
+        currentFormType = formType || 'purchase';
+        console.log('currentFormType set to:', currentFormType);
+        document.getElementById('newProductModal').style.display = 'flex';
+        document.getElementById('new_product_name').focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded');
+        
+        // Add click handler for the "Əlavə et" button in the modal
+        const addButton = document.querySelector('#newProductModal button[onclick="addNewProduct()"]');
+        if (addButton) {
+            console.log('Found add button');
+            // Remove the inline onclick and use addEventListener instead
+            addButton.removeAttribute('onclick');
+            addButton.addEventListener('click', function(e) {
+                console.log('Add button clicked');
+                addNewProduct();
+            });
+        } else {
+            console.error('Could not find add button');
+        }
+
+        // Prevent form submission on Enter in input fields
+        const nameInput = document.getElementById('new_product_name');
+        const categoryInput = document.getElementById('new_product_category');
+        
+        if (nameInput) {
+            nameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    console.log('Enter pressed in name input');
+                    addNewProduct();
+                }
+            });
+        }
+        
+        if (categoryInput) {
+            categoryInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    console.log('Enter pressed in category input');
+                    addNewProduct();
+                }
+            });
+        }
+        
+        calculateTotal('purchase');
+        calculateTotal('sale');
+
+        const saleSelect = document.getElementById('sale_product');
+        if(saleSelect) {
+            updateSelectedProducts('sale');
+        }
+    });
+  </script>
+</body>
+</html>

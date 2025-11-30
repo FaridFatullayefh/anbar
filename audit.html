@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Log</title>
+<script src="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@9.1.10/index.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@9.1.10/themes/jse-theme-dark.css" rel="stylesheet">
+<style>
+:root {
+--primary-color: #343a40;
+--secondary-color: #007bff;
+--light-bg: #f8f9fa;
+--white: #ffffff;
+--border-color: #dee2e6;
+}
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: var(--light-bg);
+        min-height: 100vh;
+        padding: 30px 15px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    h2 {
+        color: var(--primary-color);
+        text-align: left;
+        margin-bottom: 25px;
+        font-size: 1.6em;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+    }
+
+    .info-block {
+        background-color: #e9f7fe;
+        border-left: 3px solid var(--secondary-color);
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 25px;
+        font-size: 0.9em;
+    }
+    
+    .details-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .details-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 80%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+    }
+    
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+    
+    .details-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    
+    .details-table th, .details-table td {
+        padding: 10px;
+        border: 1px solid #eee;
+        text-align: left;
+    }
+    
+    .details-table th {
+        background-color: #f5f5f5;
+        width: 30%;
+    }
+    
+    /* Məhsul sub-cədvəli üçün stil */
+    .product-sub-table th, .product-sub-table td {
+        padding: 8px;
+        font-size: 0.85em;
+        border: 1px solid #ddd !important;
+    }
+    /* Məhsul cədvəlinin başlıq fonu */
+    .product-sub-table thead tr {
+        background-color: #f0f8ff !important; 
+    }
+    
+    .view-details {
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    
+    .view-details:hover {
+        color: #0056b3;
+    }
+
+    .info-block h3 {
+        color: var(--secondary-color);
+        margin-bottom: 5px;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
+
+    .info-block p {
+        color: #555;
+        margin: 0;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 500px; 
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9em;
+    }
+
+    th {
+        background-color: var(--primary-color);
+        color: var(--white);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    tr:nth-child(even) {
+        background-color: var(--light-bg);
+    }
+
+    tr:hover {
+        background-color: #e9ecef;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+        gap: 5px;
+    }
+    
+    .pagination a, .pagination span {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 2px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--secondary-color);
+        background-color: white;
+    }
+    
+    .pagination a:hover {
+        background-color: #f1f1f1;
+    }
+    
+    .pagination .active {
+        background-color: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+    }
+    
+    .pagination .disabled {
+        color: #ddd;
+        pointer-events: none;
+    }
+    
+    .pagination-info {
+        text-align: center;
+        margin: 10px 0;
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .back-link {
+        display: inline-block;
+        background-color: var(--secondary-color);
+        color: var(--white);
+        text-decoration: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-top: 20px;
+        transition: background-color 0.2s ease;
+        font-size: 0.9em;
+    }
+
+    .back-link:hover {
+        background-color: #0056b3;
+    }
+    .filter-form {
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .filter-form input[type="text"],
+        .filter-form input[type="date"],
+        .filter-form input[type="search"] {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 0.9em;
+        }
+        .filter-form label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .filter-form .row > div {
+            margin-bottom: 15px;
+        }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+    }
+</style>
+
+
+</head>
+<body>
+<div class="container">
+<h2>Audit Log </h2>
+
+    <div class="info-block">
+        <h3>Sistem Fəaliyyətləri</h3>
+        <p>Bütün istifadəçi fəaliyyətləri qeyd olunur. Siz axtarış və tarix filtrlərindən istifadə edərək məlumatları süzə bilərsiniz.</p>
+    </div>
+
+    <form class="filter-form" method="GET" action="{{ url_for('audit') }}">
+        <div class="row">
+            <div class="col-md-5">
+                <label for="search_query">İşçi Adı / Əməliyyat Axtarışı:</label>
+                <input type="search" id="search_query" name="search_query" class="form-control" 
+                       placeholder="Ad və ya Əməliyyat daxil edin..." 
+                       value="{{ search_query | default('', true) }}">
+            </div>
+            <div class="col-md-2">
+                <label for="start_date">Başlanğıc Tarixi:</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" 
+                       value="{{ start_date | default('', true) }}">
+            </div>
+            <div class="col-md-2">
+                <label for="end_date">Bitiş Tarixi:</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" 
+                       value="{{ end_date | default('', true) }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100" type="submit" style="font-weight: 600;">
+                    <i class="fas fa-filter"></i> Filteri Tətbiq Et
+                </button>
+            </div>
+        </div>
+        {% if search_query or start_date or end_date %}
+        <div class="row">
+            <div class="col-12">
+                <a href="{{ url_for('audit') }}" class="btn btn-outline-danger btn-sm w-100">
+                    <i class="fas fa-times-circle"></i> Filteri Təmizlə
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tarix</th>
+                    <th>İşçi</th>
+                    <th>Əməliyyat</th>
+                    <th>Ətraflı Məlumat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.username or 'Sistem' }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>
+                        {% if log.details %}
+                            <span class="view-details" data-details='{{ log.details|tojson|safe }}'>Bax</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if total_pages > 1 %}
+    {% macro render_pagination_link(page_num, search_query, start_date, end_date) %}
+        {{ url_for('audit', 
+            page=page_num,
+            search_query=search_query,
+            start_date=start_date,
+            end_date=end_date
+        ) }}
+    {% endmacro %}
+    
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="{{ render_pagination_link(1, search_query, start_date, end_date) }}">&laquo; İlk</a>
+            <a href="{{ render_pagination_link(page-1, search_query, start_date, end_date) }}">&lsaquo; Əvvəlki</a>
+        {% else %}
+            <span class="disabled">&laquo; İlk</span>
+            <span class="disabled">&lsaquo; Əvvəlki</span>
+        {% endif %}
+        
+        {% set start_page = [1, page-2]|max %}
+        {% set end_page = [start_page + 4, total_pages]|min %}
+        {% if end_page - start_page < 4 %}
+            {% set start_page = [1, end_page - 4]|max %}
+        {% endif %}
+        
+        {% for p in range(start_page, end_page + 1) %}
+            {% if p == page %}
+                <span class="active">{{ p }}</span>
+            {% else %}
+                <a href="{{ render_pagination_link(p, search_query, start_date, end_date) }}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page < total_pages %}
+            <a href="{{ render_pagination_link(page+1, search_query, start_date, end_date) }}">Növbəti &rsaquo;</a>
+            <a href="{{ render_pagination_link(total_pages, search_query, start_date, end_date) }}">Son &raquo;</a>
+        {% else %}
+            <span class="disabled">Növbəti &rsaquo;</span>
+            <span class="disabled">Son &raquo;</span>
+        {% endif %}
+    </div>
+    <div class="pagination-info">
+        Cəmi {{ total_logs }} qeyddən {{ (page-1)*50 + 1 }}-{{ [page*50, total_logs]|min }} göstərilir
+    </div>
+    {% endif %}
+    
+    <a href="{{ url_for('index') }}" class="back-link">Geri</a>
+</div>
+
+<div id="detailsPopup" class="details-popup">
+    <div class="details-content">
+        <span class="close-btn" onclick="closeDetails()">&times;</span>
+        <h3>Ətraflı Məlumat</h3>
+        <div id="detailsContainer"></div>
+    </div>
+</div>
+
+<script>
+    function showDetails(details) {
+        const popup = document.getElementById('detailsPopup');
+        const container = document.getElementById('detailsContainer');
+        
+        container.innerHTML = '';
+        
+        try {
+            if (typeof details === 'string') {
+                details = JSON.parse(details);
+            }
+            
+            if (details && typeof details === 'object') {
+                const table = document.createElement('table');
+                table.className = 'details-table';
+                
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th style="color: blue;">Xüsusiyyət</th>
+                        <th style="color: blue;">Dəyər</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+                
+                const tbody = document.createElement('tbody');
+                
+                const addRow = (key, value) => {
+                    const row = document.createElement('tr');
+                    
+                    const formattedKey = key
+                        .replace(/_/g, ' ') 
+                        .replace(/\b\w/g, l => l.toUpperCase()); 
+                    
+                    let formattedValue = value;
+                    
+                    const is_empty_string = (typeof value === 'string' && value.trim() === "");
+
+                    if (value === null || value === undefined || is_empty_string) {
+                        formattedValue = '-';
+                    } else if (typeof value === 'object' && !Array.isArray(value)) {
+                        formattedValue = JSON.stringify(value, null, 2);
+                    } else if (Array.isArray(value)) {
+                        formattedValue = JSON.stringify(value, null, 2);
+                    }
+
+                    if (typeof formattedValue === 'string' && formattedValue !== '-') {
+                        formattedValue = formattedValue.replace(/\n/g, '<br>');
+                    }
+                    
+                    row.innerHTML = `
+                        <td><strong>${formattedKey}</strong></td>
+                        <td>${formattedValue}</td>
+                    `;
+                    tbody.appendChild(row);
+                };
+                
+                for (const [key, value] of Object.entries(details)) {
+                    if (key === 'products' && Array.isArray(value)) {
+                        
+                        const productsRowHeader = document.createElement('tr');
+                        productsRowHeader.innerHTML = `
+                            <td colspan="2" style="background-color: #f5f5f5;"><strong>Məhsul Siyahısı (${value.length} məhsul)</strong></td>
+                        `;
+                        tbody.appendChild(productsRowHeader);
+
+                        const productsRowContent = document.createElement('tr');
+                        const productsCell = document.createElement('td');
+                        productsCell.setAttribute('colspan', '2');
+
+                        const productTable = document.createElement('table');
+                        productTable.className = 'product-sub-table';
+                        productTable.style.width = '100%';
+
+                        productTable.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th style="color: blue;">Ad</th>
+                                    <th style="color: blue;">Miqdar</th>
+                                    <th style="color: blue;">Qiymət</th>
+                                    <th style="color: blue;">Ümumi</th>
+                                    <th style="color: blue;">Qeyd</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${value.map(p => `
+                                    <tr>
+                                        <td>${p.product_name || p.name || '-'}</td>
+                                        <td>${p.quantity !== undefined ? p.quantity : '-'}</td>
+                                        <td>${p.price !== undefined ? p.price : '-'}</td>
+                                        <td>${p.total !== undefined ? p.total : '-'}</td>
+                                        <td>${p.note && p.note.trim() !== '' ? p.note : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+
+                        productsCell.appendChild(productTable);
+                        productsRowContent.appendChild(productsCell);
+                        tbody.appendChild(productsRowContent);
+                        
+                    } else {
+                        addRow(key, value);
+                    }
+                }
+                
+                table.appendChild(tbody);
+                container.appendChild(table);
+            } else {
+                container.textContent = 'Ətraflı məlumat yoxdur.';
+            }
+        } catch (e) {
+            container.textContent = details || 'Ətraflı məlumat yoxdur.';
+            console.error("Error processing details:", e);
+        }
+        
+        popup.style.display = 'flex';
+    }
+    
+    function closeDetails() {
+        document.getElementById('detailsPopup').style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        const popup = document.getElementById('detailsPopup');
+        if (event.target === popup) {
+            popup.style.display = 'none';
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const detailButtons = document.querySelectorAll('.view-details');
+        detailButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const details = JSON.parse(this.getAttribute('data-details'));
+                showDetails(details);
+            });
+        });
+    });
+</script>
+</body> 
+</html>

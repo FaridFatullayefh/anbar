@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şirkətlər</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary-color: #6c757d;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --light-bg: #f8fafc;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: transparent;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 i {
+            color: var(--primary-color);
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            background: var(--white);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-header {
+            background-color: var(--white);
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+        }
+
+        .card-header i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: var(--transition);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border-radius: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+            height: 38px;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .btn-secondary {
+            color: #fff;
+            background-color: #95a5a6;
+            border-color: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            border-color: #7f8c8d;
+        }
+
+        .btn-danger {
+            color: #fff;
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+
+        .btn-success {
+            color: #fff;
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
+
+        .btn i {
+            margin-right: 5px;
+        }
+
+        .table-responsive {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 0;
+            background-color: transparent;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background-color: #f8fafc;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--border-color);
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+        }
+
+        .badge-success {
+            color: #fff;
+            background-color: var(--success-color);
+        }
+
+        .badge-danger {
+            color: #fff;
+            background-color: var(--danger-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-buttons .btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .action-buttons .btn i {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+
+        .mt-5 {
+            margin-top: 3rem;
+        }
+
+        .no-data {
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            background-color: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .no-data i {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .no-data p {
+            margin: 0.5rem 0 0;
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .no-data i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #bdc3c7;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .action-buttons .btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .table-responsive {
+                border: 0;
+            }
+
+            .table thead {
+                display: none;
+            }
+
+            .table, .table tbody, .table tr, .table td {
+                display: block;
+                width: 100%;
+            }
+
+            .table tr {
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .table td:last-child {
+                border-bottom: 0;
+            }
+
+            .table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 1rem;
+                width: 45%;
+                padding-right: 1rem;
+                text-align: left;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                font-size: 0.75rem;
+            }
+
+            .table td .action-buttons {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Şirkətlər</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-{{ 'edit' if supplier_edit else 'plus' }} me-2"></i>
+                {{ 'Şirkət məlumatlarını dəyişdir' if supplier_edit else 'Yeni Şirkət Əlavə Et' }}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% if supplier_edit %}
+                        <input type="hidden" name="supplier_id" value="{{ supplier_edit.id }}">
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name" class="form-label">Şirkət adı *</label>
+                                <input type="text" class="form-control" id="name" name="name" required
+                                       value="{{ supplier_edit.name if supplier_edit else '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="contact_person" class="form-label">Əlaqəli şəxs</label>
+                                <input type="text" class="form-control" id="contact_person" name="contact_person"
+                                       value="{{ supplier_edit.contact_person if supplier_edit and supplier_edit.contact_person else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="phone" class="form-label">Telefon</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                       value="{{ supplier_edit.phone if supplier_edit and supplier_edit.phone else '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label">E-poçt</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="{{ supplier_edit.email if supplier_edit and supplier_edit.email else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="address" class="form-label">Ünvan</label>
+                        <textarea class="form-control" id="address" name="address" rows="2">{{ supplier_edit.address if supplier_edit and supplier_edit.address else '' }}</textarea>
+                    </div>
+                    {% if not supplier_edit %}
+                    <div class="form-group mt-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked>
+                            <label class="form-check-label" for="is_active">Aktiv</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i> {{ 'Yadda Saxla' if supplier_edit else 'Əlavə Et' }}
+                        </button>
+                        {% if supplier_edit %}
+                            <a href="{{ url_for('suppliers') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i> Ləğv et
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-list me-2"></i>Şirkətlər</span>
+                <span class="badge bg-secondary">Cəmi: {{ suppliers|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Adı</th>
+                                <th>Əlaqəli şəxs</th>
+                                <th>Telefon</th>
+                                <th>Status</th>
+                                <th class="text-center">Əməliyyatlar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for supplier in suppliers %}
+                            <tr>
+                                <td>{{ supplier.id }}</td>
+                                <td><strong>{{ supplier.name }}</strong></td>
+                                <td>{{ supplier.contact_person or '-' }}</td>
+                                <td>{{ supplier.phone or '-' }}</td>
+                                <td>
+                                    <span class="badge {% if supplier.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        <i class="fas fa-{% if supplier.is_active %}check{% else %}times{% endif %} me-1"></i>
+                                        {{ 'Aktiv' if supplier.is_active else 'Deaktiv' }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="action-buttons justify-content-center">
+                                        <a href="{{ url_for('suppliers', edit=supplier.id) }}" 
+                                                   class="btn btn-sm btn-primary"
+                                                   title="Redaktə et">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if supplier.is_active %}
+                                            <a href="{{ url_for('toggle_supplier', id=supplier.id) }}" 
+                                                       class="btn btn-sm btn-danger"
+                                                       title="Deaktiv et"
+                                                       onclick="return confirm('Bu şirkəti deaktiv etmək istədiyinizə əminsiniz?')">
+                                                        <i class="fas fa-ban"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ url_for('toggle_supplier', id=supplier.id) }}" 
+                                                       class="btn btn-sm btn-success"
+                                                       title="Aktiv et">
+                                                        <i class="fas fa-check"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="no-data">
+                                        <i class="fas fa-info-circle"></i>
+                                        <p class="mt-2 mb-0">Heç bir şirkət tapılmadı. Yeni şirkət əlavə edin.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Əsas Səhifəyə Qayıt
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

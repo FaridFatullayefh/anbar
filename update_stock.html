@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stok Əməliyyatı - {{ product.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+    :root {
+        --primary-color: #343a40;
+        --secondary-color: #007bff;
+        --light-bg: #f8f9fa;
+        --white: #ffffff;
+        --border-color: #dee2e6;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+    }
+
+    body {
+        background-color: var(--light-bg);
+        font-family: Arial, sans-serif;
+        color: #333;
+    }
+
+    .card {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.2s ease;
+        margin-bottom: 1.5rem;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    }
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        font-weight: 600;
+    }
+
+    .form-floating label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .form-control, .form-select, textarea.form-control {
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-control:focus, .form-select:focus, textarea.form-control:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.15);
+    }
+    textarea.form-control { resize: none; }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+    }
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover { background-color: rgba(0,123,255,0.05); }
+    .table-success-light { background-color: rgba(40,167,69,0.05); }
+    .table-danger-light { background-color: rgba(220,53,69,0.05); }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.4em 0.65em;
+        border-radius: 6px;
+    }
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--light-bg);
+        border-radius: 50%;
+    }
+
+    .btn-primary {
+        background-color: var(--secondary-color);
+        color: var(--white);
+        border-radius: 6px;
+        border: none;
+        transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        background-color: #0069d9;
+    }
+
+    .alert {
+        border-radius: 6px;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05);
+    }
+
+    @media (max-width: 768px) {
+        .table thead { display: none; }
+        .table tbody tr { display: block; margin-bottom: 1rem; background: #fff; border-radius: 8px; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.05); }
+        .table td { display: flex; justify-content: space-between; padding: 0.5rem 1rem; }
+        .table td::before { content: attr(data-label); font-weight: 600; color: #6c757d; }
+    }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-boxes me-2"></i>Stok Əməliyyatı
+                    </h2>
+                    <a href="{{ url_for('products') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Geri
+                    </a>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Məhsul Məlumatları</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-light" id="product_name" value="{{ product.name }}" readonly>
+                                    <label for="product_name">Məhsul Adı</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-light fw-bold" id="current_stock" value="{{ '%.2f'|format(product.stock) }} {{ product.unit }}" readonly>
+                                    <label for="current_stock">Cari Stok</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Stok Əməliyyatı</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('update_stock', id=product.id) }}" class="needs-validation" novalidate>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="operation" name="action_type" required>
+                                            <option value="" selected disabled>Seçin...</option>
+                                            <option value="in">Stok Əlavə Et (+)</option>
+                                            <option value="out">Stokdan Çıxar (-)</option>
+                                        </select>
+                                        <label for="operation">Əməliyyat Növü</label>
+                                        <div class="invalid-feedback">
+                                            Zəhmət olmasa əməliyyat növünü seçin.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" step="0.01" min="0.01" class="form-control" id="qty_change" name="qty_change" required>
+                                        <label for="qty_change" id="quantity-label">Miqdar ({{ product.unit }})</label>
+                                        <div class="invalid-feedback">
+                                            Zəhmət olmasa düzgün miqdar daxil edin.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="description" name="description" style="height: 100px" required></textarea>
+                                        <label for="description">İzahat</label>
+                                        <div class="form-text">Məsələn: "Tədarükdən gəlib", "Satış üçün çıxarış" və s.</div>
+                                        <div class="invalid-feedback">
+                                            Zəhmət olmasa əməliyyat üçün izahat yazın.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                                        <i class="fas fa-save me-2"></i>Yadda Saxla
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const operationSelect = document.getElementById('operation');
+        const quantityLabel = document.getElementById('quantity-label');
+        const quantityInput = document.getElementById('qty_change');
+        const form = document.querySelector('form.needs-validation');
+
+        function updateQuantityLabel() {
+            const operation = operationSelect.value;
+            let labelText = 'Miqdar (' + '{{ product.unit }}' + ')';
+            
+            if (operation === 'in') {
+                labelText = 'Əlavə ediləcək miqdar (' + '{{ product.unit }}' + ')';
+            } else if (operation === 'out') {
+                labelText = 'Çıxarılacaq miqdar (' + '{{ product.unit }}' + ')';
+            }
+            
+            quantityLabel.textContent = labelText;
+            quantityInput.min = "0.01";
+        }
+
+        operationSelect.addEventListener('change', updateQuantityLabel);
+        updateQuantityLabel();
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const operation = operationSelect.value;
+                const quantity = parseFloat(quantityInput.value);
+                const currentStock = parseFloat('{{ product.stock | default(0) | float }}');
+                
+                const existingAlerts = form.querySelectorAll('.alert');
+                existingAlerts.forEach(alert => alert.remove());
+                
+                if (!form.checkValidity()) {
+                    event.stopPropagation();
+                } else if (operation === 'out' && quantity > currentStock) {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                    alertDiv.role = 'alert';
+                    alertDiv.innerHTML = `
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Xəta!</strong> Çıxarılacaq miqdar (${quantity} {{ product.unit }}) cari stokdan (${currentStock} {{ product.unit }}) çox ola bilməz!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+                    `;
+                    form.insertBefore(alertDiv, form.firstChild);
+                    
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    return;
+                }
+                
+                form.submit();
+            }, false);
+        }
+    });
+    </script>
+</body>
+</html>

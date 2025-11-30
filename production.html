@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="az">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>İstehsalat Əməliyyatı</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .container { padding-top: 20px }
+        .card-header { font-weight: 600 }
+        .input-row, .output-row { align-items: center }
+        .w-25 { min-width: 100px }
+        .form-control-sm { padding-right: 5px }
+        /* Disabled input üçün stil */
+        .disabled-input {
+            background-color: #f8f9fa !important;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>🏭 İstehsalat / Xammalın Hazır Məhsula Çevrilməsi</h2>
+            <a href="{{ url_for('production_report') }}" class="btn btn-info btn-lg">
+                <i class="fas fa-file-alt"></i> Hesabatlar
+            </a>
+        </div>
+        <p class="text-muted">Anbardan xammal çıxarılır və onun əvəzinə hazır məhsullar anbara daxil edilir.</p>
+        <hr>
+        
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category, message in
+        messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}{% endif %}{% endwith %}
+        
+        <form method="POST" action="{{ url_for('handle_production') }}">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">Xammal (Anbardan Çıxır)</div>
+                        <div class="card-body" id="input-items-container">
+                            <p class="text-muted">Ən azı bir xammal daxil edin.</p>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addInputBtn">+ Xammal Əlavə Et</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">Hazır Məhsul (Anbara Daxil Olur)</div>
+                        <div class="card-body" id="output-items-container">
+                            <p class="text-muted">Ən azı bir hazır məhsul daxil edin.</p>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-sm btn-outline-success" id="addOutputBtn">+ Məhsul Əlavə Et</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label for="description">Qeyd / Təsvir:</label>
+                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+            </div>
+            
+            <script>
+                const productionUrl = "{{ url_for('index') }}";
+            </script>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary btn-lg" onclick="window.location.href=productionUrl;">
+                    ← Geri Qayıt
+                </button>
+                <button type="submit" class="btn btn-lg btn-success">✅ İstehsalat Əməliyyatını Tamamla</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const products = JSON.parse('{{ products|tojson|safe }}' || '[]');
+            
+            const productMap = products.reduce((acc, p) => {
+                acc[p.id] = p;
+                return acc;
+            }, {});
+
+            function generateOptions() {
+                return products.map(p => `<option value="${p.id}">${p.name} (${p.unit}) [Stok: ${p.stock}]</option>`).join('');
+            }
+
+            function getUnitOptions(selectedValue = 'ədəd') {
+                const units = ["ədəd", "kq", "ton", "litr", "metr", "metr kvadrat", "metr kub", "rulu", "qablaşdırma", "dəst", "qutu", "bağlama", "paket"];
+                return units.map(unit => 
+                    `<option value="${unit}" ${unit === selectedValue ? 'selected' : ''}>${unit}</option>`
+                ).join('');
+            }
+
+            // Hazır məhsul sətri üçün məntiqin tətbiqi (toggle) - YENİ DÜZƏLİŞ
+            function applyOutputProductLogic(row) {
+                const selectElement = row.querySelector('[name="output_product_id[]"]');
+                const nameInputElement = row.querySelector('[name="output_new_product_name[]"]');
+                const unitSelectElement = row.querySelector('[name="output_unit[]"]');
+                const quantityInputElement = row.querySelector('[name="output_quantity[]"]'); 
+
+                if (!selectElement || !nameInputElement || !unitSelectElement || !quantityInputElement) {
+                    return;
+                }
+                
+                // Sahələrin cari vəziyyətini yeniləyən əsas funksiya
+                function updateRowState() {
+                    const selectedId = selectElement.value;
+                    const nameWritten = nameInputElement.value.trim() !== "";
+                    
+                    // --- MÖVCUD MƏHSUL seçilib ---
+                    if (selectedId && selectedId !== "") {
+                        const product = productMap[selectedId];
+                        const productUnit = product ? product.unit : 'ədəd';
+                        
+                        // Yeni Adı deaktiv et və təmizlə
+                        nameInputElement.value = "";
+                        nameInputElement.disabled = true;
+                        nameInputElement.required = false;
+                        nameInputElement.classList.add('disabled-input');
+                        nameInputElement.placeholder = 'Mövcud məhsul seçilib';
+
+                        // Vahidi məhsulun vahidi ilə əvəz et və deaktiv et
+                        unitSelectElement.innerHTML = getUnitOptions(productUnit);
+                        unitSelectElement.disabled = true;
+                        unitSelectElement.classList.add('disabled-input');
+                        
+                        // Miqdarı aktiv et
+                        quantityInputElement.disabled = false;
+                        quantityInputElement.required = true;
+                        quantityInputElement.classList.remove('disabled-input');
+
+                        // ID seçimini aktiv saxla
+                        selectElement.disabled = false;
+                        selectElement.classList.remove('disabled-input');
+
+                    } 
+                    // --- YENİ MƏHSUL adı yazılıb ---
+                    else if (nameWritten) {
+                        
+                        // ID seçimini təmizlə, deaktiv et
+                        selectElement.value = "";
+                        selectElement.disabled = true;
+                        selectElement.classList.add('disabled-input');
+
+                        // Yeni Adı, Vahidi və Miqdarı aktiv et
+                        nameInputElement.disabled = false;
+                        nameInputElement.required = true;
+                        nameInputElement.classList.remove('disabled-input');
+                        nameInputElement.placeholder = 'Yeni məhsulun adı (məcburi)';
+                        
+                        unitSelectElement.disabled = false;
+                        unitSelectElement.classList.remove('disabled-input');
+                        unitSelectElement.innerHTML = getUnitOptions(unitSelectElement.value || 'ədəd');
+
+                        quantityInputElement.disabled = false;
+                        quantityInputElement.required = true;
+                        quantityInputElement.classList.remove('disabled-input');
+
+                    } 
+                    // --- HEÇ BİRİ SEÇİLMƏYİB (İlkin vəziyyət) ---
+                    else {
+                        // Miqdarı deaktiv et
+                        quantityInputElement.disabled = true;
+                        quantityInputElement.required = false;
+                        quantityInputElement.classList.add('disabled-input');
+                        
+                        // ID seçimini və Yeni Ad sahəsini aktiv saxla
+                        selectElement.disabled = false;
+                        selectElement.classList.remove('disabled-input');
+                        
+                        nameInputElement.disabled = false;
+                        nameInputElement.required = true;
+                        nameInputElement.classList.remove('disabled-input');
+                        nameInputElement.placeholder = 'Yeni məhsulun adı (məcburi)';
+                        
+                        unitSelectElement.disabled = false;
+                        unitSelectElement.classList.remove('disabled-input');
+                        unitSelectElement.innerHTML = getUnitOptions('ədəd');
+                    }
+                }
+                
+                // Event listenerları yalnız updateRowState funksiyasını çağırır
+                selectElement.addEventListener('change', updateRowState);
+                nameInputElement.addEventListener('input', updateRowState);
+                
+                // İlkin yüklənmədə məntiqi tətbiq et
+                updateRowState();
+            }
+
+            function addInputRow() {
+                const container = document.getElementById('input-items-container');
+                const placeholder = container.querySelector('p.text-muted');
+                if (placeholder) placeholder.remove();
+
+                const div = document.createElement('div');
+                div.className = 'd-flex mb-2 input-row';
+                div.innerHTML = `<select class="form-control form-control-sm mr-2" name="input_product_id[]" required>
+                    <option value="">-- Xammalı Seçin --</option>${generateOptions()}
+                    </select>
+                    <input type="number" step="any" min="0.001" class="form-control form-control-sm mr-2 w-25" name="input_quantity[]" placeholder="Miqdar" required>
+                    <button type="button" class="btn btn-sm btn-danger remove-btn">X</button>`;
+                container.appendChild(div);
+                div.querySelector('.remove-btn').addEventListener('click', () => div.remove());
+            }
+
+            function addOutputRow() {
+                const container = document.getElementById('output-items-container');
+                const placeholder = container.querySelector('p.text-muted');
+                if (placeholder) placeholder.remove();
+
+                const div = document.createElement('div');
+                div.className = 'd-flex mb-2 output-row';
+                div.innerHTML = `<select class="form-control form-control-sm mr-2" name="output_product_id[]">
+                    <option value="">-- Mövcud Məhsul Seç --</option>${generateOptions()}
+                    </select>
+                    <input type="text" class="form-control form-control-sm mr-2" style="min-width:150px;" name="output_new_product_name[]" placeholder="Yeni məhsulun adı (məcburi)">
+                    <select class="form-control form-control-sm mr-2 w-25" name="output_unit[]" style="min-width:100px;">
+                        ${getUnitOptions()}
+                    </select>
+                    <input type="number" step="0.001" min="0.001" class="form-control form-control-sm mr-2 w-25" name="output_quantity[]" placeholder="Miqdar" required>
+                    <button type="button" class="btn btn-sm btn-danger remove-btn">X</button>`;
+                container.appendChild(div);
+
+                applyOutputProductLogic(div); 
+
+                div.querySelector('.remove-btn').addEventListener('click', () => div.remove());
+            }
+
+            // Form Submit Məntiqi (Serverə göndərilməzdən əvvəl son yoxlama və tənzimləmə)
+            document.querySelector('form').addEventListener('submit', function(e) {
+                let hasValidInput = false;
+                let hasValidOutput = false;
+                let outputErrors = [];
+                
+                const elementsToReEnable = [];
+
+                // --- Input Validasiyası ---
+                document.querySelectorAll('#input-items-container .input-row').forEach((row) => {
+                    const quantityInput = row.querySelector('input[name="input_quantity[]"]');
+                    const selectElement = row.querySelector('select[name="input_product_id[]"]');
+                    
+                    if (selectElement.value && quantityInput.value.trim()) {
+                        hasValidInput = true;
+                        // Formatlama
+                        quantityInput.value = quantityInput.value.trim().replace(',', '.');
+                    } else {
+                        row.querySelectorAll('input, select').forEach(el => {
+                            if (!el.disabled) elementsToReEnable.push(el);
+                            el.disabled = true;
+                        });
+                    }
+                });
+                
+                // --- Output Validasiyası və Form Dəyərlərinin Düzəldilməsi ---
+                document.querySelectorAll('#output-items-container .output-row').forEach((row, index) => {
+                    const selectElement = row.querySelector('[name="output_product_id[]"]');
+                    const nameInput = row.querySelector('[name="output_new_product_name[]"]');
+                    const unitSelect = row.querySelector('[name="output_unit[]"]');
+                    const quantityInput = row.querySelector('[name="output_quantity[]"]');
+                    
+                    const nameValue = nameInput ? nameInput.value.trim() : '';
+                    const quantityValue = quantityInput ? quantityInput.value.trim() : '';
+                    
+                    if (!quantityValue) {
+                        row.querySelectorAll('input, select').forEach(el => {
+                            if (!el.disabled) elementsToReEnable.push(el);
+                            el.disabled = true;
+                        });
+                        return;
+                    }
+
+                    quantityInput.value = quantityValue.replace(',', '.');
+                    const quantity = parseFloat(quantityInput.value);
+
+                    if (isNaN(quantity) || quantity <= 0) {
+                        outputErrors.push(`Sətr ${index + 1}: Miqdar düzgün rəqəm formatında deyil (sıfırdan böyük olmalıdır)!`);
+                        return;
+                    }
+                    
+                    const isExistingProductSelected = selectElement.value && selectElement.value !== '' && selectElement.value !== 'new';
+
+                    if (nameValue && !isExistingProductSelected) {
+                        // YENİ MƏHSUL
+                        selectElement.value = 'new'; // Serverə 'new' göndərilməsi üçün
+                        selectElement.disabled = false; 
+                        nameInput.disabled = false;
+                        unitSelect.disabled = false;
+                        hasValidOutput = true;
+                    } else if (isExistingProductSelected && !nameValue) {
+                        // MÖVCUD MƏHSUL
+                        selectElement.disabled = false; 
+                        nameInput.disabled = true; // Ad göndərilməməlidir
+                        unitSelect.disabled = true; // Vahid mövcud məhsulun vahididir
+                        hasValidOutput = true;
+                    } else if (nameValue && isExistingProductSelected) {
+                        // ZİDDİYYƏT (Bu hal updateRowState tərəfindən idarə olunur, amma son yoxlama)
+                        outputErrors.push(`Sətr ${index + 1}: Həm mövcud məhsul seçimi, həm də yeni məhsul adı daxil edilib. Yalnız birini seçin!`);
+                        return;
+                    } else {
+                        outputErrors.push(`Sətr ${index + 1}: Miqdar daxil edildiyi halda, məhsul seçilməyib/adı daxil edilməyib!`);
+                        return;
+                    }
+
+                    // Göndərilməsi üçün deaktiv edilmiş elementləri (yalnız form elementlərini) aktiv et
+                    row.querySelectorAll('input, select').forEach(el => {
+                        if (el.name && (el.name.startsWith('output_') || el.name.startsWith('input_')) && el.disabled) {
+                           elementsToReEnable.push(el);
+                           el.disabled = false;
+                        }
+                    });
+                });
+                
+                // Xəta varsa, form təqdimatını dayandır və deaktiv edilənləri geri qaytar
+                if (outputErrors.length > 0) {
+                    e.preventDefault();
+                    alert('Aşağıdakı xətaları düzəldin:\n' + outputErrors.join('\n'));
+                    
+                    elementsToReEnable.forEach(el => el.disabled = false);
+                    
+                    return false;
+                }
+                
+                if (!hasValidInput) {
+                    e.preventDefault();
+                    alert('Ən azı bir xammal (miqdar ilə) daxil edin!');
+                    return false;
+                }
+                
+                if (!hasValidOutput) {
+                    e.preventDefault();
+                    alert('Ən azı bir hazır məhsul (miqdar ilə) daxil edin!');
+                    return false;
+                }
+
+                // Final olaraq, yoxlama zamanı disabled edilmiş bütün elementləri (boş sətirlər istisna olmaqla) aktiv edirik
+                // Həmçinin, submit zamanı yuxarıda disabled edilən boş sətirlərin disabled vəziyyətini qoruyuruq.
+                return true;
+            });
+
+            document.getElementById('addInputBtn').addEventListener('click', addInputRow);
+            document.getElementById('addOutputBtn').addEventListener('click', addOutputRow);
+
+            // Başlanğıc sətirlərini əlavə et
+            addInputRow();
+            addOutputRow();
+            addOutputRow();
+        });
+    </script>
+</body>
+
+</html>

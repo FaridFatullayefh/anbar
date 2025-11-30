@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Səhifə</title>
+    
+    <style>
+        :root {
+            --primary-color: #212529; 
+            --secondary-color: #007bff; 
+            --success-color: #28a745;  
+            --danger-color: #dc3545; 
+            --warning-color: #ffc107;  
+            --light-bg: #f4f6f9;      
+            --white: #ffffff;
+            --border-color: #e9ecef;
+            --light-text: #6c757d;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-bg);
+            min-height: 100vh;
+            color: var(--primary-color);
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 50px;
+        }
+
+        .header { text-align:center; margin-bottom:40px; }
+        
+        h2 { 
+            color: var(--primary-color); 
+            font-size: 2.2em; 
+            font-weight: 600; 
+            margin-bottom: 5px; 
+        }
+        
+        .subtitle { 
+            color: var(--light-text); 
+            font-size:1.1em; 
+            font-weight: 400; 
+            margin-top: 5px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: inline-block;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px; 
+            margin-top: 40px;
+        }
+
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: 8px; 
+            padding: 25px; 
+            text-align: left;
+            color: var(--primary-color); 
+            text-decoration: none; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .dashboard-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); 
+            border-color: var(--secondary-color);
+        }
+        
+        .card-content {
+            display: flex;
+            align-items: center; 
+            gap: 15px;
+        }
+
+        .icon-box {
+            font-size: 1.5em; 
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            color: var(--white);
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-text-area {
+            flex-grow: 1;
+        }
+
+        .dashboard-card:not(.finance-card):not(.logout-card) .icon-box { background-color: var(--secondary-color); }
+        .dashboard-card:hover:not(.finance-card):not(.logout-card) { border-color: var(--secondary-color); }
+
+        .finance-card .icon-box { background-color: #17a2b8; }
+        .finance-card:hover { border-color: #17a2b8; }
+        
+        .logout-card .icon-box { background-color: var(--danger-color); }
+        .logout-card:hover { border-color: var(--danger-color); }
+
+        .dashboard-card h3 { 
+            font-size:1.15em; 
+            margin: 0;
+            font-weight:700; 
+            color: var(--primary-color); 
+        }
+
+        .badge-stats {
+            position:absolute; 
+            top:15px; 
+            right:15px;
+            background: var(--light-bg); 
+            color: var(--primary-color);
+            padding:4px 8px; 
+            border-radius:4px; 
+            font-size:0.8em;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width:768px) {
+            .container { padding:20px; }
+            h2 { font-size:1.8em; }
+            .dashboard-grid { grid-template-columns:1fr; gap:20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Xoş gəlmisiniz, {{ username }}!</h2>
+        </div>
+        
+        <div class="dashboard-grid">
+            
+            {% if session.get('role') == 'Admin' %}
+            
+            <a href="{{ url_for('finance_dashboard') }}" class="dashboard-card finance-card" title="Xalis balans: {{ net_balance }} AZN">
+                <div class="card-content">
+                    <span class="icon-box">$</span>
+                    <div class="card-text-area">
+                        <h3>Maliyyə</h3>
+                    </div>
+                </div>
+                <span class="badge-stats">Balans: {{ net_balance|round(2) }} AZN</span>
+            </a>
+
+            <a href="{{ url_for('financial_transactions') }}" class="dashboard-card finance-card" title="Gəlir və xərc əməliyyatlarını daxil etmək üçün">
+                <div class="card-content">
+                    <span class="icon-box">&plusmn;</span>
+                    <div class="card-text-area">
+                        <h3>Gəlir / Xərc Qeydiyyatı</h3>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('debts_management') }}" class="dashboard-card finance-card" title="Qalıq borclar və müştəri tələbləri">
+                <div class="card-content">
+                    <span class="icon-box">&#x21C5;</span>
+                    <div class="card-text-area">
+                        <h3>Borclar / Tələblər</h3>
+                    </div>
+                    <span class="badge-stats">Borclar: {{ total_debts|round(2) }} AZN</span>
+                </div>
+            </a>
+
+            <a href="{{ url_for('invoices') }}" class="dashboard-card finance-card" title="Bütün ödənişlər və fakturalar">
+                <div class="card-content">
+                    <span class="icon-box">&#x1F4B5;</span>
+                    <div class="card-text-area">
+                        <h3>Fakturalar</h3>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('employees') }}" class="dashboard-card" title="İşçiləri əlavə et və idarə et">
+                <div class="card-content">
+                    <span class="icon-box">&#x263F;</span>
+                    <div class="card-text-area">
+                        <h3>İşçilər</h3>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('audit') }}" class="dashboard-card" title="Sistem fəaliyyətinə bax">
+                <div class="card-content">
+                    <span class="icon-box">#</span>
+                    <div class="card-text-area">
+                        <h3>Audit Log</h3>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('suppliers') }}" class="dashboard-card" title="Şirkətləri idarə et">
+                <div class="card-content">
+                    <span class="icon-box">&#x2699;</span>
+                    <div class="card-text-area">
+                        <h3>Şirkətlər</h3>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('production_form') }}" class="dashboard-card" title="Məhsul istehsalını və xammal istifadəsini idarə et">
+                <div class="card-content">
+                    <span class="icon-box">&#x2692;</span>
+                    <div class="card-text-area">
+                        <h3>İstehsalat</h3>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('debt_report') }}" class="dashboard-card" title="Borclarla bağlı hesabatlar">
+                <div class="card-content">
+                    <span class="icon-box">📈</span>
+                    <div class="card-text-area">
+                        <h3>Hesabat</h3>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+            
+            <a href="{{ url_for('products') }}" class="dashboard-card" title="Stok və məhsulları idarə et">
+                <div class="card-content">
+                    <span class="icon-box">&#x2610;</span>
+                    <div class="card-text-area">
+                        <h3>Anbar / Məhsullar</h3>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('transactions') }}" class="dashboard-card" title="Alış və satış əməliyyatlarını idarə et">
+                <div class="card-content">
+                    <span class="icon-box">&#x27F7;</span>
+                    <div class="card-text-area">
+                        <h3>Alış / Satış</h3>
+                    </div>
+                </div>
+            </a>
+            
+
+            <a href="{{ url_for('logout') }}" class="dashboard-card logout-card" title="Hesabdan çıx">
+                <div class="card-content">
+                    <span class="icon-box">&#x23CF;</span>
+                    <div class="card-text-area">
+                        <h3>Çıxış</h3>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

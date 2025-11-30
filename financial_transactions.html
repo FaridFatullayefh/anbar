@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gəlir və Xərclər</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #343a40; 
+            --secondary-color: #007bff; 
+            --success-color: #28a745; 
+            --danger-color: #dc3545;  
+            --warning-color: #ffc107;  
+            --light-bg: #f8f9fa;      
+            --white: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--light-bg);
+            min-height: 100vh;
+            color: #333;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2, h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h3 {
+            font-size: 1.25em;
+        }
+
+        .alert-message {
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid var(--danger-color);
+        }
+        .alert-primary { 
+            background-color: #cce5ff;
+            color: #004085;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .col, .col-md-4, .col-md-6 {
+            padding: 0 10px;
+            margin-bottom: 20px;
+        }
+
+        .col-md-4 { flex: 0 0 33.33%; max-width: 33.33%; }
+        .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+        .col { flex: 1; min-width: 200px; }
+
+        .form-container {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: transform 0.2s;
+        }
+        .form-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 20px;
+            margin: -25px -25px 20px -25px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+            font-size: 0.875em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            width: 100%;
+            background: var(--white);
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .submit-btn {
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .table-section {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .table-header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+            background: var(--white);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+        }
+
+        .table-dark th {
+            background-color: var(--primary-color); 
+            color: var(--white);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .amount-income {
+            color: var(--success-color) !important;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .amount-expense {
+            color: var(--danger-color) !important;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        tr:hover .amount-income {
+            color: #1e7e34 !important;
+        }
+
+        tr:hover .amount-expense {
+            color: #c82333 !important;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-align: center;
+            color: var(--white);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .bg-success { background-color: var(--success-color); }
+        .bg-danger { background-color: var(--danger-color); }
+
+        .text-success { color: var(--success-color) !important; }
+        .text-danger { color: var(--danger-color) !important; }
+        .font-weight-bold { font-weight: 700; }
+        
+        .back-link {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-top: 30px;
+            transition: background-color 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            background-color: #23272b;
+        }
+
+        .mr-2 { margin-right: 8px; }
+        .mr-3 { margin-right: 12px; }
+        .mb-5 { margin-bottom: 20px; }
+        .mt-3 { margin-top: 12px; }
+
+        @media (max-width: 768px) {
+            .col, .col-md-4, .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                min-width: 100%;
+            }
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .form-header, .table-header {
+                margin-left: -20px;
+                margin-right: -20px;
+                padding: 12px 20px;
+            }
+            table {
+                min-width: 600px;
+            }
+            .amount-income, .amount-expense {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            table {
+                font-size: 0.8em;
+            }
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <h1>
+        <i class="fas fa-money-bill-wave"></i>
+        Gəlir və Xərclərin Qeydiyyatı
+    </h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mt-3">
+                {% for category, message in messages %}
+                    {% set msg_class = 'alert-primary' %}
+                    {% if category == 'success' %}
+                        {% set msg_class = 'alert-success' %}
+                    {% elif category == 'danger' or category == 'error' %}
+                        {% set msg_class = 'alert-danger' %}
+                    {% endif %}
+                    <div class="alert-message {{ msg_class }}" role="alert">
+                        <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' or category == 'error' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-3"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="form-container">
+        <div class="form-header">
+            <i class="fas fa-plus-circle"></i>
+            Yeni Əməliyyat Əlavə Et
+        </div>
+        <form method="POST">
+            <div class="row">
+                <div class="col">
+                    <label for="type">Əməliyyat Növü</label>
+                    <select name="type" id="type" required>
+                        <option value="Gəlir">Gəlir</option>
+                        <option value="Xərc">Xərc</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="amount">Məbləğ (AZN)</label>
+                    <input type="number" name="amount" id="amount" step="0.01" required min="0.01">
+                </div>
+                <div class="col">
+                    <label for="category">Kateqoriya</label>
+                    <input type="text" name="category" id="category" placeholder="Məs: Satış, Maaş, Komunal">
+                </div>
+                <div class="col">
+                    <label for="description">Açıqlama</label>
+                    <input type="text" name="description" id="description" placeholder="Əlavə məlumat">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col" style="flex: 0 0 auto;">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i>
+                        Əlavə et
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div class="table-section">
+        <div class="table-header" style="padding: 15px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-history" style="font-size: 1.2em;"></i>
+                    <h2 style="margin: 0; font-size: 1.3em; font-weight: 600; color: #fff;">Əməliyyat Tarixçəsi</h2>
+                </div>
+                {% if request.args.get('search') %}
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 5px 12px; border-radius: 15px; font-size: 0.9em; display: flex; align-items: center; gap: 8px;">
+                    <span style="opacity: 0.8;">Axtarış nəticələri:</span>
+                    <span style="font-weight: 600;">{{ total_transactions }} nəticə tapıldı</span>
+                    <a href="{{ url_for('financial_transactions') }}" style="color: #fff; opacity: 0.8; text-decoration: none; margin-left: 5px;" title="Axtarışı təmizlə">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <form method="GET" action="{{ url_for('financial_transactions') }}" class="search-form" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
+                <div style="display: flex; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px; position: relative;">
+                        <div style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #6c757d;">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input type="text" 
+                               name="search" 
+                               value="{{ request.args.get('search', '') }}" 
+                               placeholder="Axtarış..." 
+                               class="search-input"
+                               style="width: 100%; padding: 12px 20px 12px 40px; border: none; outline: none; font-size: 0.95em; background: transparent;">
+                    </div>
+                    
+                    <div style="position: relative; border-left: 1px solid #eee;">
+                        <select name="search_type" style="height: 100%; padding: 0 40px 0 15px; border: none; outline: none; background: transparent; appearance: none; font-size: 0.95em; cursor: pointer; min-width: 150px;">
+                            <option value="all" {% if request.args.get('search_type', 'all') == 'all' %}selected{% endif %}>Hamısında axtar</option>
+                            <option value="type" {% if request.args.get('search_type') == 'type' %}selected{% endif %}>Növə görə</option>
+                            <option value="category" {% if request.args.get('search_type') == 'category' %}selected{% endif %}>Kateqoriyaya görə</option>
+                            <option value="description" {% if request.args.get('search_type') == 'description' %}selected{% endif %}>Açıqlama üzrə</option>
+                            <option value="amount" {% if request.args.get('search_type') == 'amount' %}selected{% endif %}>Məbləğə görə</option>
+                        </select>
+                        <div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #6c757d;">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="search-button" style="background: #007bff; color: white; border: none; padding: 0 25px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-search"></i>
+                        <span>Axtar</span>
+                    </button>
+                    
+                    {% if request.args.get('search') %}
+                    <a href="{{ url_for('financial_transactions') }}" class="clear-search" style="display: flex; align-items: center; padding: 0 20px; background: #f8f9fa; color: #6c757d; text-decoration: none; transition: background 0.2s; border-left: 1px solid #eee;">
+                        <i class="fas fa-times" style="margin-right: 5px;"></i>
+                        <span>Təmizlə</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Vaxt</th>
+                        <th>Növ</th>
+                        <th>Məbləğ (AZN)</th>
+                        <th>Kateqoriya</th>
+                        <th>Açıqlama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.id }}</td>
+                        <td>{{ t.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td>
+                            <span class="badge {% if t.type == 'Gəlir' %}bg-success{% else %}bg-danger{% endif %}">
+                                <i class="fas {% if t.type == 'Gəlir' %}fa-arrow-down{% else %}fa-arrow-up{% endif %} mr-2"></i>
+                                {{ t.type }}
+                            </span>
+                        </td>
+                        <td class="{% if t.type == 'Gəlir' %}amount-income{% else %}amount-expense{% endif %}">
+                            {{ t.amount|round(2) }} AZN
+                        </td>
+                        <td>{{ t.category or '-' }}</td>
+                        <td>{{ t.description or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <div class="pagination" style="margin: 25px 0 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="color: #6c757d; font-size: 0.9em;">
+                    {% set start_item = (current_page - 1) * 50 + 1 %}
+                    {% set end_item = [current_page * 50, total_transactions]|min %}
+                    Nəticələr: {{ start_item }}-{{ end_item }} / {{ total_transactions }}
+                </div>
+                
+                <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                    <!-- First Page -->
+                    {% if current_page > 1 %}
+                        {% set search_params = {'search': request.args.get('search', ''), 'search_type': request.args.get('search_type', 'all')} %}
+                        <a href="{{ url_for('financial_transactions', page=1, **search_params) }}" class="pagination-link" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; text-decoration: none; color: #007bff; display: flex; align-items: center; transition: all 0.2s; background: white;" 
+                           onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#007bff'" 
+                           onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#dee2e6'" 
+                           title="Birinci səhifə">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="{{ url_for('financial_transactions', page=current_page-1, **search_params) }}" class="pagination-link" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; text-decoration: none; color: #007bff; display: flex; align-items: center; transition: all 0.2s; background: white;"
+                           onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#007bff'" 
+                           onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#dee2e6'" 
+                           title="Əvvəlki səhifə">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% else %}
+                        <span style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; color: #6c757d; background: #f8f9fa; opacity: 0.6;">
+                            <i class="fas fa-angle-double-left"></i>
+                        </span>
+                        <span style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; color: #6c757d; background: #f8f9fa; opacity: 0.6;">
+                            <i class="fas fa-angle-left"></i>
+                        </span>
+                    {% endif %}
+                    
+                    <!-- Page Numbers -->
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == current_page %}
+                            <span class="current-page" style="padding: 8px 12px; border: 1px solid #007bff; border-radius: 4px; background-color: #007bff; color: white; font-weight: 500;">
+                                {{ p }}
+                            </span>
+                        {% elif p >= current_page - 2 and p <= current_page + 2 %}
+                            {% set search_params = {'search': request.args.get('search', ''), 'search_type': request.args.get('search_type', 'all'), 'page': p} %}
+                            <a href="{{ url_for('financial_transactions', **search_params) }}" 
+                               class="pagination-link" 
+                               style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; text-decoration: none; color: #007bff; transition: all 0.2s; background: white;"
+                               onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#007bff'" 
+                               onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#dee2e6'">
+                                {{ p }}
+                            </a>
+                        {% elif (p == 1 and current_page > 3) or (p == total_pages and current_page < total_pages - 2) %}
+                            <span style="padding: 8px 12px; color: #6c757d;">...</span>
+                        {% endif %}
+                    {% endfor %}
+                
+                    <!-- Next/Last Page -->
+                    {% if current_page < total_pages %}
+                        {% set search_params = {'search': request.args.get('search', ''), 'search_type': request.args.get('search_type', 'all')} %}
+                        <a href="{{ url_for('financial_transactions', page=current_page+1, **search_params) }}" 
+                           class="pagination-link" 
+                           style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; text-decoration: none; color: #007bff; display: flex; align-items: center; transition: all 0.2s; background: white;"
+                           onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#007bff'" 
+                           onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#dee2e6'" 
+                           title="Növbəti səhifə">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="{{ url_for('financial_transactions', page=total_pages, **search_params) }}" 
+                           class="pagination-link" 
+                           style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; text-decoration: none; color: #007bff; display: flex; align-items: center; transition: all 0.2s; background: white;"
+                           onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.borderColor='#007bff'" 
+                           onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#dee2e6'" 
+                           title="Sonuncu səhifə">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% else %}
+                        <span style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; color: #6c757d; background: #f8f9fa; opacity: 0.6;">
+                            <i class="fas fa-angle-right"></i>
+                        </span>
+                        <span style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; color: #6c757d; background: #f8f9fa; opacity: 0.6;">
+                            <i class="fas fa-angle-double-right"></i>
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <div style="color: #6c757d; font-size: 0.9em;">
+                    Səhifə {{ current_page }} / {{ total_pages }}
+                </div>
+                
+                <!-- Total Records -->
+                <div style="margin-left: 20px; display: flex; align-items: center; color: #6c757d; font-size: 0.9em;">
+                    {% if request.args.get('search') %}
+                        {{ total_transactions }} nəticə tapıldı
+                    {% else %}
+                        Cəmi {{ total_transactions }} məlumat
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+        <a href="{{ url_for('index') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Geri
+        </a>
+        
+        {% if total_pages > 1 %}
+        <div style="color: #6c757d; display: flex; align-items: center;">
+            Səhifə {{ current_page }} / {{ total_pages }}
+        </div>
+        {% endif %}
+    </div>
+</main>
+</body>
+</html>
